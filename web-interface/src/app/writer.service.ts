@@ -10,16 +10,18 @@ export interface Writer {
   writings: string[];
 }
 
+export interface Stroke {
+  points: {
+    x: number,
+    y: number,
+    time: string
+  }[];
+}
+
 export interface Writing {
   writerId: string;
   writingId: string;
-  strokes: {
-    points: {
-      x: number,
-      y: number,
-      time: string
-    }[]
-  }[];
+  strokes: Stroke[];
   captureTime: Date;
   text: string;
 }
