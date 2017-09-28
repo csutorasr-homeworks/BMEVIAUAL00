@@ -38,12 +38,43 @@ namespace WebInterface.Repository.Writings
                 return null;
             }
             XDocument doc = XDocument.Load(file.OpenRead());
+            // General info
             var generalElement = doc.Root.Element("General");
+            // Capture time
             var captureTimeElement = generalElement.Element("CaptureTime");
             var captureTime = new DateTime(Int32.Parse(captureTimeElement.Attribute("year").Value),
                 Int32.Parse(captureTimeElement.Attribute("month").Value),
                 Int32.Parse(captureTimeElement.Attribute("dayOfMonth").Value));
-            return new Writing(writerId, writingId, captureTime);
+            // Transcription
+            var transcriptionElement = doc.Root.Element("Transcription");
+            var textElement = transcriptionElement.Element("Text");
+            string text;
+            using (var reader = textElement.CreateReader())
+            {
+                reader.MoveToContent();
+                text = reader.ReadInnerXml().Trim();
+            }
+            // Strokes
+            var strokeSetElement = doc.Root.Element("StrokeSet");
+            var strokes = strokeSetElement.Elements("Stroke")
+                .Select(stroke => new Stroke()
+                {
+                    Points = stroke.Elements("Point")
+                        .Select(point => new Point
+                        {
+                            X = Int32.Parse(point.Attribute("x").Value),
+                            Y = Int32.Parse(point.Attribute("y").Value),
+                            Time = point.Attribute("time").Value
+                        })
+                });
+            return new Writing()
+            {
+                WriterId = writerId,
+                WritingId = writingId,
+                CaptureTime = captureTime,
+                Text = text,
+                Strokes = strokes
+            };
         }
     }
 }
