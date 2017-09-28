@@ -1,0 +1,9 @@
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\bin\Debug\netcoreapp1.1\web-interface.deps.json
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\bin\Debug\netcoreapp1.1\web-interface.runtimeconfig.json
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\bin\Debug\netcoreapp1.1\web-interface.runtimeconfig.dev.json
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\bin\Debug\netcoreapp1.1\web-interface.dll
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\bin\Debug\netcoreapp1.1\web-interface.pdb
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\obj\Debug\netcoreapp1.1\web-interface.csprojResolveAssemblyReference.cache
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\obj\Debug\netcoreapp1.1\web-interface.AssemblyInfo.cs
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\obj\Debug\netcoreapp1.1\web-interface.dll
+C:\Users\Csuto\Documents\projects\BMEVIAUAL00\web-interface\obj\Debug\netcoreapp1.1\web-interface.pdb
