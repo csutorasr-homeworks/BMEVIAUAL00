@@ -19,11 +19,15 @@ namespace WebInterface.API
         {
             this.repository = repository;
         }
-        // GET: api/values
         [HttpGet]
-        public IEnumerable<Writer> Get()
+        public IEnumerable<string> Get()
         {
             return repository.GetList();
+        }
+        [HttpGet("{id}")]
+        public Writer Get(string id)
+        {
+            return repository.Get(id);
         }
     }
 }

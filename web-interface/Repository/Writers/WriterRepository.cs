@@ -17,9 +17,21 @@ namespace WebInterface.Repository.Writers
             this.directory = Directory.CreateDirectory(directory);
         }
 
-        IEnumerable<Writer> IWriterRepository.GetList()
+        IEnumerable<string> IWriterRepository.GetList()
         {
-            return directory.GetDirectories().Select(dir => new Writer(dir.Name));
+            return directory.EnumerateDirectories().Select(dir => dir.Name);
+        }
+
+        Writer IWriterRepository.Get(string id)
+        {
+            return new Writer(id,
+                directory.EnumerateDirectories()
+                .FirstOrDefault(x => x.Name == id)
+                ?.EnumerateDirectories()
+                .SelectMany(x => x
+                    .EnumerateFiles("*.xml")
+                    .Select(file => $"{x.Name}_{Path.GetFileNameWithoutExtension(file.Name)}")
+                ));
         }
     }
 }

@@ -8,6 +8,7 @@ namespace WebInterface.Repository.Writers
 {
     public interface IWriterRepository
     {
-        IEnumerable<Writer> GetList();
+        IEnumerable<string> GetList();
+        Writer Get(string id);
     }
 }
