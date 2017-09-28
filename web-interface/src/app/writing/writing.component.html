@@ -5,7 +5,10 @@
 </p>
 <h3>Drawing:</h3>
 <svg [attr.width]="svgWidth$ | async" [attr.height]="svgHeight$ | async">
-  <svg:g *ngFor="let stroke of (strokes$ | async)" style="stroke:rgb(0,0,0);stroke-width:1">
-    <svg:line *ngFor="let line of stroke.drawablePoints" [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" />
+  <svg:g *ngFor="let stroke of (strokes$ | async); index as i" (click)="strokeClicked(i)">
+    <ng-container *ngFor="let line of stroke.drawablePoints">
+      <svg:line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" style="stroke:rgba(0, 0, 0, 0);stroke-width:10" />
+      <svg:line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" style="stroke:rgb(0, 0, 0);stroke-width:1" />
+    </ng-container>
   </svg:g>
 </svg>

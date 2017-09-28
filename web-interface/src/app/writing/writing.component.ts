@@ -88,11 +88,15 @@ export class WritingComponent implements OnInit {
         rightOffset = point.x;
       }
     }));
-    const zoom = 0.1;
+    const zoom = 0.15;
     return {
       drawableStrokes: strokes.map(stroke => this.convertToDrawableStroke(stroke, leftOffset, topOffset, zoom)),
-      width: (leftOffset - rightOffset) * zoom,
+      width: (rightOffset - leftOffset) * zoom,
       height: (bottomOffset - topOffset) * zoom
     };
+  }
+
+  strokeClicked(index) {
+    alert(index);
   }
 }
