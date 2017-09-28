@@ -1,0 +1,3 @@
+<select (change)="changed($event.target.value)">
+  <option *ngFor="let writer of (writers$ | async)" [value]="writer">{{writer}}</option>
+</select>
