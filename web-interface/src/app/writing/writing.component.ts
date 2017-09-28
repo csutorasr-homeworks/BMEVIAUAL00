@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/pairwise';
+import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/toArray';
 
 import { WriterService, Stroke } from '../writer.service';
@@ -38,7 +39,7 @@ export class WritingComponent implements OnInit {
 
   ngOnInit() {
     const writing$ = this.activatedRoute.params
-      .mergeMap(x => this.writerService.getWriting(x.writerId, x.writingId));
+      .mergeMap(x => this.writerService.getWriting(x.writerId, x.writingId)).share();
     this.writerId$ = writing$.map(x => x.writerId);
     this.text$ = writing$.map(x => x.text);
     const drawData = writing$.map(x => this.convertToDrawData(x.strokes));
