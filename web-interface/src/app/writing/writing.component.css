@@ -1,0 +1,11 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.svgContainer {
+    overflow: auto;
+    border: 2px solid black;
+}
