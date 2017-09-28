@@ -11,6 +11,7 @@ using System.IO;
 using WebInterface.Repository.Writers;
 using WebInterface.Configuration;
 using Microsoft.Extensions.Configuration;
+using WebInterface.Repository.Writings;
 
 namespace WebInterface
 {
@@ -39,6 +40,9 @@ namespace WebInterface
             // Add program specific services
             services.AddTransient<IWriterRepository>((serivceProvider) =>
                 new WriterRepository(Configuration.GetValue<string>(nameof(MyConfiguration.DataDirectory))
+            ));
+            services.AddTransient<IWritingRepository>((serivceProvider) =>
+                new WritingRepository(Configuration.GetValue<string>(nameof(MyConfiguration.DataDirectory))
             ));
         }
 
