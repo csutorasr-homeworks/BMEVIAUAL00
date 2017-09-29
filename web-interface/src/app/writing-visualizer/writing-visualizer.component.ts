@@ -45,10 +45,13 @@ export class WritingVisualizerComponent implements OnInit {
     const drawDataWithZoom$ = Observable.combineLatest(drawData$, this.zoom$).share();
     this.drawableStrokes$ = Observable.combineLatest(drawData$.map(x => x.drawableStrokes), this.selected$)
       .map(([drawableStrokes, selected]) => {
+        const newDrawableStrokes = [...drawableStrokes];
         Object.keys(selected).forEach(i => {
-          drawableStrokes[i].color = selected[i];
+          // the object must be copied before change
+          newDrawableStrokes[i] = { ...newDrawableStrokes[i] };
+          newDrawableStrokes[i].color = selected[i];
         });
-        return drawableStrokes;
+        return newDrawableStrokes;
       });
     this.svgWidth$ = drawDataWithZoom$.map(([drawData, zoom]) => (drawData.rightOffset - drawData.leftOffset) * zoom);
     this.svgHeight$ = drawDataWithZoom$.map(([drawData, zoom]) => (drawData.bottomOffset - drawData.topOffset) * zoom);
