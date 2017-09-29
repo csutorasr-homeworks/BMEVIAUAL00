@@ -1,0 +1,8 @@
+:host {
+    overflow: auto;
+    border: 2px solid black;
+}
+
+svg line {
+    cursor: pointer;
+}

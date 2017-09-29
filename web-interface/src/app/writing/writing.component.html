@@ -4,13 +4,8 @@
   {{text$ | async}}
 </p>
 <h3>Drawing:</h3>
-<div class="svgContainer">
-  <svg [attr.width]="svgWidth$ | async" [attr.height]="svgHeight$ | async">
-    <svg:g *ngFor="let stroke of (strokes$ | async); index as i" (click)="strokeClicked(i)">
-      <ng-container *ngFor="let line of stroke.drawablePoints">
-        <svg:line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" style="stroke:rgba(0, 0, 0, 0);stroke-width:10" />
-        <svg:line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" style="stroke:rgb(0, 0, 0);stroke-width:1" />
-      </ng-container>
-    </svg:g>
-  </svg>
+<div class="buttons">
+  <button (click)="zoomIn()">+</button>
+  <button (click)="zoomOut()">-</button>
 </div>
+<app-writing-visualizer [strokes$]="strokes$" [zoom$]="zoom$"></app-writing-visualizer>
