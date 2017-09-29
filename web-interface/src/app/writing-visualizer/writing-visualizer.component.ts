@@ -6,12 +6,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/share';
 
 interface DrawableStroke extends Stroke {
-  drawablePoints: {
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number
-  }[];
+  drawablePath: string;
 }
 
 interface DrawData {
@@ -63,16 +58,13 @@ export class WritingVisualizerComponent implements OnInit {
   convertToDrawableStroke(stroke: Stroke): DrawableStroke {
     const drawableStroke: DrawableStroke = {
       ...stroke,
-      drawablePoints: []
+      drawablePath: ''
     };
-    const array = drawableStroke.points;
-    for (let i = 0; i < array.length - 1; i++) {
-      drawableStroke.drawablePoints.push({
-        x1: array[i].x,
-        y1: array[i].y,
-        x2: array[i + 1].x,
-        y2: array[i + 1].y,
-      });
+    if (drawableStroke.points.length > 0) {
+      drawableStroke.drawablePath = `M ${drawableStroke.points[0].x} ${drawableStroke.points[0].y}`;
+    }
+    for (let i = 1; i < drawableStroke.points.length; i++) {
+      drawableStroke.drawablePath += ` L ${drawableStroke.points[i].x} ${drawableStroke.points[i].y}`;
     }
     return drawableStroke;
   }
