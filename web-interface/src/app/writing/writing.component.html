@@ -4,8 +4,5 @@
   {{text$ | async}}
 </p>
 <h3>Drawing:</h3>
-<div class="buttons">
-  <button (click)="zoomIn()">+</button>
-  <button (click)="zoomOut()">-</button>
-</div>
+<app-zoom (zoom$)="changeZoom($event)"></app-zoom>
 <app-writing-visualizer [strokes$]="strokes$" [zoom$]="zoom$" (selected)="selected($event)"></app-writing-visualizer>

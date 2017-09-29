@@ -10,6 +10,7 @@ import { WriterSelectorComponent } from './writer-selector/writer-selector.compo
 import { WritingComponent } from './writing/writing.component';
 import { WriterService } from './writer.service';
 import { WritingVisualizerComponent } from './writing-visualizer/writing-visualizer.component';
+import { ZoomComponent } from './zoom/zoom.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { WritingVisualizerComponent } from './writing-visualizer/writing-visuali
     WriterComponent,
     WriterSelectorComponent,
     WritingComponent,
-    WritingVisualizerComponent
+    WritingVisualizerComponent,
+    ZoomComponent
   ],
   imports: [
     BrowserModule,

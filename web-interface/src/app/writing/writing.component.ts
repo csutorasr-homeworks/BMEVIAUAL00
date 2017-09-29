@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/pairwise';
 import 'rxjs/add/operator/share';
-import 'rxjs/add/operator/toArray';
+import 'rxjs/add/observable/of';
 
 import { WriterService, Stroke } from '../writer.service';
 import { Observable } from 'rxjs/Observable';
@@ -33,12 +33,8 @@ export class WritingComponent implements OnInit {
     this.strokes$ = writing$.map(x => x.strokes);
   }
 
-  zoomIn() {
-    this.zoomSubject.next(this.zoomSubject.value * 2);
-  }
-
-  zoomOut() {
-    this.zoomSubject.next(this.zoomSubject.value * 0.5);
+  changeZoom(zoom) {
+    this.zoomSubject.next(zoom);
   }
 
   selected(index) {
