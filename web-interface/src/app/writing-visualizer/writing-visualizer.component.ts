@@ -100,9 +100,13 @@ export class WritingVisualizerComponent implements OnInit {
         rightOffset = point.x;
       }
     }));
+    const strokeWidth = 5;
     return {
       drawableStrokes: strokes.map(stroke => this.convertToDrawableStroke(stroke)),
-      topOffset, bottomOffset, leftOffset, rightOffset,
+      topOffset: topOffset - strokeWidth,
+      bottomOffset: bottomOffset + strokeWidth,
+      leftOffset: leftOffset - strokeWidth,
+      rightOffset: rightOffset + strokeWidth,
     };
   }
 
