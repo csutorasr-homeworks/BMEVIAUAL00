@@ -3,6 +3,10 @@
     border: 2px solid black;
 }
 
+svg {
+    transition: 0.5s all;
+}
+
 svg line {
     cursor: pointer;
 }
