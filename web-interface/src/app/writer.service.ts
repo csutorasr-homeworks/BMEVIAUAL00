@@ -16,6 +16,7 @@ export interface Stroke {
     y: number,
     time: string
   }[];
+  color: string;
 }
 
 export interface Writing {
@@ -40,7 +41,15 @@ export class WriterService {
   }
 
   getWriting(writerId: string, writingId: string): Observable<Writing> {
-    return this.http.get(`${apiEndpoint}/writers/${writerId}/${writingId}`).map(res => res.json());
+    return this.http.get(`${apiEndpoint}/writers/${writerId}/${writingId}`)
+      .map(res => res.json())
+      .map((writing: Writing) => ({
+        ...writing,
+        strokes: writing.strokes.map(stroke => ({
+          color: 'black',
+          ...stroke
+        }))
+      }));
   }
 
 }
