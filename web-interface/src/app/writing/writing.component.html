@@ -8,4 +8,4 @@
   <button (click)="zoomIn()">+</button>
   <button (click)="zoomOut()">-</button>
 </div>
-<app-writing-visualizer [strokes$]="strokes$" [zoom$]="zoom$"></app-writing-visualizer>
+<app-writing-visualizer [strokes$]="strokes$" [zoom$]="zoom$" (selected)="selected($event)"></app-writing-visualizer>

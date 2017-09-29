@@ -40,4 +40,8 @@ export class WritingComponent implements OnInit {
   zoomOut() {
     this.zoomSubject.next(this.zoomSubject.value * 0.5);
   }
+
+  selected(index) {
+    alert(index);
+  }
 }
