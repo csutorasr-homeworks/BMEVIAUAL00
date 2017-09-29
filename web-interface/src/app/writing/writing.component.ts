@@ -38,10 +38,12 @@ export class WritingComponent implements OnInit {
     this.writerId$ = writing$.map(x => x.writerId);
     this.text$ = writing$.map(x => x.text);
     this.strokes$ = Observable.combineLatest(writing$, this.selectedSubject.asObservable())
-      .map(([writing, selected]) => writing.strokes.map((stroke, i) => ((i in selected) ? {
-        ...stroke,
-        color: selected[i]
-      } : stroke)));
+      .map(([writing, selected]) => {
+        Object.keys(selected).forEach(i => {
+          writing.strokes[i].color = selected[i];
+        });
+        return writing.strokes;
+      });
   }
 
   changeZoom(zoom) {
