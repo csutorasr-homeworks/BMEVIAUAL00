@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Stroke } from '../writer.service';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/combineLatest';
@@ -34,6 +34,7 @@ export class WritingVisualizerComponent implements OnInit {
   svgHeight$: Observable<number>;
   svgWidth$: Observable<number>;
   drawableStrokes$: Observable<DrawableStroke[]>;
+  @Output() selected = new EventEmitter<number>();
 
   constructor() { }
 
@@ -94,6 +95,6 @@ export class WritingVisualizerComponent implements OnInit {
   }
 
   strokeClicked(index) {
-    alert(index);
+    this.selected.next(index);
   }
 }
