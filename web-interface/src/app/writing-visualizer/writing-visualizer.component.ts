@@ -60,12 +60,16 @@ export class WritingVisualizerComponent implements OnInit {
       ...stroke,
       drawablePath: ''
     };
+    let backwards = '';
     if (drawableStroke.points.length > 0) {
       drawableStroke.drawablePath = `M ${drawableStroke.points[0].x} ${drawableStroke.points[0].y}`;
+      backwards = ` Z`;
     }
     for (let i = 1; i < drawableStroke.points.length; i++) {
       drawableStroke.drawablePath += ` L ${drawableStroke.points[i].x} ${drawableStroke.points[i].y}`;
+      backwards = ` L ${drawableStroke.points[i].x} ${drawableStroke.points[i].y}${backwards}`;
     }
+    drawableStroke.drawablePath += backwards;
     return drawableStroke;
   }
 
