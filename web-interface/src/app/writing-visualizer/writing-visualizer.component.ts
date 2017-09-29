@@ -29,6 +29,7 @@ interface DrawData {
 })
 export class WritingVisualizerComponent implements OnInit {
   @Input() strokes$: Observable<Stroke[]>;
+  @Input() selected$: Observable<{ [key: string]: string }>;
   @Input() zoom$: Observable<number>;
   svgViewBox$: Observable<string>;
   svgHeight$: Observable<number>;
@@ -42,7 +43,13 @@ export class WritingVisualizerComponent implements OnInit {
   ngOnInit() {
     const drawData$ = this.strokes$.map(x => this.convertToDrawData(x)).share();
     const drawDataWithZoom$ = Observable.combineLatest(drawData$, this.zoom$).share();
-    this.drawableStrokes$ = drawData$.map(x => x.drawableStrokes);
+    this.drawableStrokes$ = Observable.combineLatest(drawData$.map(x => x.drawableStrokes), this.selected$)
+      .map(([drawableStrokes, selected]) => {
+        Object.keys(selected).forEach(i => {
+          drawableStrokes[i].color = selected[i];
+        });
+        return drawableStrokes;
+      });
     this.svgWidth$ = drawDataWithZoom$.map(([drawData, zoom]) => (drawData.rightOffset - drawData.leftOffset) * zoom);
     this.svgHeight$ = drawDataWithZoom$.map(([drawData, zoom]) => (drawData.bottomOffset - drawData.topOffset) * zoom);
     this.svgViewBox$ = drawData$.map(x => `${x.leftOffset} ${x.topOffset} ${x.rightOffset - x.leftOffset} ${x.bottomOffset - x.topOffset}`);

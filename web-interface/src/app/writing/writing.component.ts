@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/pairwise';
 import 'rxjs/add/operator/share';
-import 'rxjs/add/observable/combineLatest';
 
 import { WriterService, Stroke } from '../writer.service';
 import { Observable } from 'rxjs/Observable';
@@ -20,9 +19,8 @@ export class WritingComponent implements OnInit {
   writerId$: Observable<string>;
   zoomSubject: BehaviorSubject<number>;
   zoom$: Observable<number>;
-  selectedSubject: BehaviorSubject<{
-    [key: string]: string
-  }>;
+  selectedSubject: BehaviorSubject<{ [key: string]: string }>;
+  selected$: Observable<{ [key: string]: string; }>;
 
   constructor(private activatedRoute: ActivatedRoute, private writerService: WriterService, private router: Router) { }
 
@@ -37,13 +35,8 @@ export class WritingComponent implements OnInit {
     // set data for bindings
     this.writerId$ = writing$.map(x => x.writerId);
     this.text$ = writing$.map(x => x.text);
-    this.strokes$ = Observable.combineLatest(writing$, this.selectedSubject.asObservable())
-      .map(([writing, selected]) => {
-        Object.keys(selected).forEach(i => {
-          writing.strokes[i].color = selected[i];
-        });
-        return writing.strokes;
-      });
+    this.strokes$ = writing$.map(x => x.strokes);
+    this.selected$ = this.selectedSubject.asObservable();
   }
 
   changeZoom(zoom) {
