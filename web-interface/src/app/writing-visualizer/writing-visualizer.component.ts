@@ -33,6 +33,7 @@ export class WritingVisualizerComponent implements OnInit {
   svgViewBox$: Observable<string>;
   svgHeight$: Observable<number>;
   svgWidth$: Observable<number>;
+  hitBoxWidth$: Observable<number>;
   drawableStrokes$: Observable<DrawableStroke[]>;
   @Output() selected = new EventEmitter<number>();
 
@@ -45,6 +46,7 @@ export class WritingVisualizerComponent implements OnInit {
     this.svgWidth$ = drawDataWithZoom$.map(([drawData, zoom]) => (drawData.rightOffset - drawData.leftOffset) * zoom);
     this.svgHeight$ = drawDataWithZoom$.map(([drawData, zoom]) => (drawData.bottomOffset - drawData.topOffset) * zoom);
     this.svgViewBox$ = drawData$.map(x => `${x.leftOffset} ${x.topOffset} ${x.rightOffset - x.leftOffset} ${x.bottomOffset - x.topOffset}`);
+    this.hitBoxWidth$ = this.zoom$.map(x => 6 / x);
   }
 
 
