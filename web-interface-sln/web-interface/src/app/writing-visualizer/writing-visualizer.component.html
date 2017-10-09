@@ -1,0 +1,6 @@
+<svg [attr.width]="svgWidth$ | async" [attr.height]="svgHeight$ | async" [attr.viewBox]="svgViewBox$ | async">
+  <svg:g *ngFor="let stroke of (drawableStrokes$ | async); index as i" (click)="strokeClicked(i)" >
+    <svg:path [attr.d]="stroke.drawablePath" style="stroke-width:5" fill="transparent" [attr.stroke]="stroke.color" />
+    <svg:path [attr.d]="stroke.drawablePath" [style.strokeWidth]="hitBoxWidth$ | async" fill="transparent" stroke="transparent" />
+  </svg:g>
+</svg>
