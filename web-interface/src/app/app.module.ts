@@ -1,4 +1,4 @@
-﻿import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
@@ -11,6 +11,7 @@ import { WritingComponent } from './writing/writing.component';
 import { WriterService } from './writer.service';
 import { WritingVisualizerComponent } from './writing-visualizer/writing-visualizer.component';
 import { ZoomComponent } from './zoom/zoom.component';
+import { StrokeDataChangerComponent } from './stroke-data-changer/stroke-data-changer.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { ZoomComponent } from './zoom/zoom.component';
     WriterSelectorComponent,
     WritingComponent,
     WritingVisualizerComponent,
-    ZoomComponent
+    ZoomComponent,
+    StrokeDataChangerComponent
   ],
   imports: [
     BrowserModule,

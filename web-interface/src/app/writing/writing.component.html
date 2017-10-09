@@ -1,8 +1,38 @@
-<a [routerLink]="'/writer/' + (writerId$ | async)">Choose another writing</a>
-<h3>Text:</h3>
-<p>
-  {{text$ | async}}
-</p>
-<h3>Drawing:</h3>
+<div class="navigator">
+  <a [routerLink]="'/writer/' + (writerId$ | async)">Choose another writing</a>
+  <a>Next Writing</a>
+</div>
+<table>
+  <tr>
+    <th colspan="2">Data of writer:</th>
+  </tr>
+  <tr>
+    <td>Calculated Handedness:</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Manual Handedness:</td>
+    <td>
+      <select>
+        <option value="left">Left</option>
+        <option value="right">Right</option>
+        <option value="unknown">Unknown</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <th colspan="2">Data of writing:</th>
+  </tr>
+  <tr>
+    <td>Text:</td>
+    <td>{{text$ | async}}</td>
+  </tr>
+  <tr>
+    <td>Algorithm log</td>
+    <td [title]="'Log will be shown'">Hover to show</td>
+  </tr>
+</table>
+<h3>Writing:</h3>
 <app-zoom (zoom$)="changeZoom($event)"></app-zoom>
+<app-stroke-data-changer [strokes$]="strokes$" [selected$]="selected$" (changeType)="changeSelectionType($event)"></app-stroke-data-changer>
 <app-writing-visualizer [strokes$]="strokes$" [zoom$]="zoom$" [selected$]="selected$" (selected)="selected($event)"></app-writing-visualizer>

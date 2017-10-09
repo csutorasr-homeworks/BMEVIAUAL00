@@ -52,4 +52,7 @@ export class WritingComponent implements OnInit {
     }
     this.selectedSubject.next(newValue);
   }
+
+  changeSelectionType() {
+  }
 }
