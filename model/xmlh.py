@@ -4,10 +4,16 @@ import copy
 
 
 def remove_outlier_points(file_name):
+    """
+    Finds and removes the outlier points from the stroke in the given file.
+    :param file_name: The file that will be scanned for outliers.
+    :return:
+    """
     strokes = build_structure(file_name)
 
     draw_speed = []
 
+    # Creating a list that contains the speed of the pen between two points.
     for index in range(len(strokes)):
         draw_speed.append([])
         for point_index in range(len(strokes[index][:-1])):
@@ -18,6 +24,7 @@ def remove_outlier_points(file_name):
                                      ((strokes[index][point_index + 1][1] - strokes[index][point_index][1]) if
                                       (strokes[index][point_index + 1][1] - strokes[index][point_index][1]) > 0
                                       else 0.01))
+            # If the delta time is 0 then it is set to 0.01 (the shortest time spam that can be recorded)
 
     linear_data = []
 
@@ -25,6 +32,7 @@ def remove_outlier_points(file_name):
         for point in stroke:
             linear_data.append(point)
 
+    # Finding the quartiles for outlier detection
     q1, q2, q3 = get_quartiles(linear_data)
 
     outlier = q3 + 1.5*(q3-q1)
@@ -46,9 +54,15 @@ def remove_outlier_points(file_name):
 
 
 def get_quartiles(data):
+    """
+    Finds the first, second and third quartiles for a given data set.
+    :param data: Data that will be analyzed.
+    :return: First, second and third quartiles.
+    """
     ordered_data = copy.copy(data)
     ordered_data.sort()
 
+    # Separating the odd and the even length cases.
     if len(ordered_data) % 2 == 1:
         q2 = ordered_data[int(len(ordered_data) / 2)]
     else:
@@ -68,7 +82,13 @@ def get_quartiles(data):
 
 
 def mark_horizontal(file_name, indexes):
-
+    """
+    Creates an attribute in the given file, for every stroke,
+     and gives it value, based on if it is horizontal or not.
+    :param file_name: Name of the xml.
+    :param indexes: Horizontal indexes, that will be marked as "Yes".
+    :return:
+    """
     tree = ElementTree.parse(file_name)
     root = tree.getroot()
 
@@ -82,6 +102,11 @@ def mark_horizontal(file_name, indexes):
 
 
 def build_structure(file_name):
+    """
+    Creates a multi layer list structure of the given xml.
+    :param file_name: Name of the XML.
+    :return: The structured list of the XML.
+    """
     with open(file_name, 'r') as file:
         tree = ElementTree.parse(file)
         root = tree.getroot()
