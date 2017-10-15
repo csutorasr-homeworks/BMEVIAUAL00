@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ElementTree
 import numpy as np
 import os
 import math
-import util
+from . import util
 import copy
 import pickle
 
