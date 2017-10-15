@@ -1,30 +1,79 @@
 import xml.etree.ElementTree as ElementTree
 import util
+import copy
 
 
-def clear_xml(file_name):
+def remove_outlier_points(file_name):
     strokes = build_structure(file_name)
 
-    for index in range(len(strokes)):
-        for point_index in range(len(strokes[index][:-1])):
-            pass
+    draw_speed = []
 
-    with open(file_name, 'a') as file:
-        tree = ElementTree.parse(file)
-        root = tree.getroot()
-        for index in range(len(root.find('StrokeSet'))):
-            for point_index in range(len(root.find('StrokeSet')[index][:-1])):
-                pass
+    for index in range(len(strokes)):
+        draw_speed.append([])
+        for point_index in range(len(strokes[index][:-1])):
+            draw_speed[index].append(util.point_2_point(util.Point(strokes[index][point_index][0].x,
+                                                                   strokes[index][point_index][0].y),
+                                                        util.Point(strokes[index][point_index+1][0].x,
+                                                                   strokes[index][point_index+1][0].y)) /
+                                     ((strokes[index][point_index + 1][1] - strokes[index][point_index][1]) if
+                                      (strokes[index][point_index + 1][1] - strokes[index][point_index][1]) > 0
+                                      else 0.01))
+
+    linear_data = []
+
+    for stroke in draw_speed:
+        for point in stroke:
+            linear_data.append(point)
+
+    q1, q2, q3 = get_quartiles(linear_data)
+
+    outlier = q3 + 1.5*(q3-q1)
+
+    tree = ElementTree.parse(file_name)
+    root = tree.getroot()
+    for index in range(len(root.find('StrokeSet'))):
+        for point_index in range(len(root.find('StrokeSet')[index][:-1])):
+            if draw_speed[index][point_index] > outlier:
+                print("Stroke:" + str(index))
+                root.find('StrokeSet')[index].remove(root.find('StrokeSet')[index][point_index+1])
+
+    tree.write(file_name)
+
+
+def get_quartiles(data):
+    ordered_data = copy.copy(data)
+    ordered_data.sort()
+
+    if len(ordered_data) % 2 == 1:
+        q2 = ordered_data[int(len(ordered_data) / 2)]
+    else:
+        q2 = (ordered_data[int(len(ordered_data) / 2) - 1] + ordered_data[int(len(ordered_data) / 2)]) / 2
+
+    if len(ordered_data[int(len(ordered_data) / 2) + len(ordered_data) % 2:]) % 2 == 1:
+        q1 = ordered_data[int(len(ordered_data) / 2 - 1 - int(len(ordered_data) / 2) / 2)]
+        q3 = ordered_data[int(len(ordered_data) / 2 + int(len(ordered_data) / 2) / 2)]
+
+    else:
+        q1 = (ordered_data[int(len(ordered_data) / 2 - 1 - int(len(ordered_data) / 2) / 2)] +
+              ordered_data[int(len(ordered_data) / 2 - int(len(ordered_data) / 2) / 2)]) / 2
+        q3 = (ordered_data[int(len(ordered_data) / 2 - 1 + len(ordered_data) % 2 + int(len(ordered_data) / 2) / 2)] +
+              ordered_data[int(len(ordered_data) / 2 + len(ordered_data) % 2 + int(len(ordered_data) / 2) / 2)]) / 2
+
+    return q1, q2, q3
 
 
 def mark_horizontal(file_name, indexes):
-    file = open(file_name, 'a')
 
-    tree = ElementTree.parse(file)
+    tree = ElementTree.parse(file_name)
     root = tree.getroot()
 
-    tree.write(file)
-    # Todo
+    for i in range(len(root.find('StrokeSet'))):
+        if i in indexes:
+            root.find('StrokeSet')[i].attrib['Horizontal'] = "Yes"
+        else:
+            root.find('StrokeSet')[i].attrib['Horizontal'] = "No"
+
+    tree.write(file_name)
 
 
 def build_structure(file_name):
@@ -38,13 +87,13 @@ def build_structure(file_name):
         # StrokeSet tag stores the strokes in the xml
         for index in range(len(root.find('StrokeSet'))):
             strokes.append([(util.Point(float(point.attrib['x']), float(point.attrib['y'])),
-                             point.attrib['time']) for point in root.find('StrokeSet')[index][:]])
+                             float(point.attrib['time'])) for point in root.find('StrokeSet')[index][:]])
 
     return strokes
 
 
 def main():
-    pass
+    remove_outlier_points('/home/patrik/strokesz.xml')
 
 
 if __name__ == "__main__":
