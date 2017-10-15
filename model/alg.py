@@ -206,9 +206,6 @@ class Algorithm:
         return std_input
 
     def determine_handedness(self):
-        """
-        Calculates the handedness based on ...
-        """
         line_dir = []
         for index in self.h_line_indexes:
             if self.strokes[int(index)][0].x < self.strokes[int(index)][-1].x:
@@ -216,9 +213,10 @@ class Algorithm:
             else:
                 line_dir.append(True)
 
-        line_dir.count(True)
+        if line_dir.count(True) > 2:
+            return True
 
-        # Todo
+        return False
 
 
 def main():
