@@ -3,6 +3,7 @@ import tkinter as tk
 import tkinter.font as tk_font
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showerror
+import xml.etree.ElementTree as ElementTree
 import getpass
 import alg
 import util
@@ -177,7 +178,7 @@ class Gui(tk.Frame):
         :param file: String, containing the absolute path of the file.
         :return:
         """
-        tree = alg.ElementTree.parse(file)
+        tree = ElementTree.parse(file)
         xml_root = tree.getroot()
 
         stroke_set = None
