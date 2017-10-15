@@ -63,6 +63,8 @@ class Gui(tk.Frame):
         self.create_menu()
         self.canvas = Canvas(self.gui_root, width=window_width, height=window_height)
 
+        self.file_name = None
+
         # The alg variable is the port between the model, and the gui.
         self.alg = None
 
@@ -135,6 +137,12 @@ class Gui(tk.Frame):
 
     def draw(self):
         scale, bias = convert_coordinates(self.strokes)
+
+        if self.file_name is not None:
+            self.canvas.create_text(float(self.gui_root.winfo_width()/2),
+                                    float(20), text=self.file_name, fill="black",
+                                    font=tk_font.Font(size=10, weight="bold"))
+
         for j, stroke in enumerate(self.strokes):
 
             # Draws the index of each stroke onto the canvas.
@@ -168,7 +176,9 @@ class Gui(tk.Frame):
             try:
                 self.alg = alg.Algorithm(str(file_name))
                 self.extract_data(str(file_name))
+                self.file_name = str(file_name)
                 self.update()
+
             except IOError:
                 showerror("Open Source File", "Failed to read file\n'%s'" % file_name)
 
@@ -203,7 +213,11 @@ class Gui(tk.Frame):
         pass
 
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     Gui(root).pack()
     root.mainloop()
+
+
+if __name__ == "__main__":
+    main()

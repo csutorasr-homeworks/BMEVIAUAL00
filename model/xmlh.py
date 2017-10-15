@@ -34,8 +34,13 @@ def remove_outlier_points(file_name):
     for index in range(len(root.find('StrokeSet'))):
         for point_index in range(len(root.find('StrokeSet')[index][:-1])):
             if draw_speed[index][point_index] > outlier:
-                print("Stroke:" + str(index))
-                root.find('StrokeSet')[index].remove(root.find('StrokeSet')[index][point_index+1])
+                try:
+                    if point_index == 0:
+                        root.find('StrokeSet')[index].remove(root.find('StrokeSet')[index][point_index])
+                    else:
+                        root.find('StrokeSet')[index].remove(root.find('StrokeSet')[index][point_index + 1])
+                except IndexError:
+                    print("Failed to remove outlier in stroke: " + str(index))
 
     tree.write(file_name)
 
@@ -93,7 +98,8 @@ def build_structure(file_name):
 
 
 def main():
-    remove_outlier_points('/home/patrik/strokesz.xml')
+    # remove_outlier_points('/home/patrik/strokesz.xml')
+    pass
 
 
 if __name__ == "__main__":
