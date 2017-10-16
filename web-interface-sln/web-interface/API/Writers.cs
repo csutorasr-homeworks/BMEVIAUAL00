@@ -52,5 +52,10 @@ namespace WebInterface.API
         {
             public string type { get; set; }
         }
+        [HttpDelete("{id}/{writingId}/lines/{index}")]
+        public IActionResult DeleteLine(string id, string writingId, int index)
+        {
+            return Ok(writingRepository.RemoveLine(id, writingId, index));
+        }
     }
 }

@@ -112,5 +112,40 @@ namespace WebInterface.Repository.Writings
             }
             return "Successful";
         }
+
+        public object RemoveLine(string writerId, string writingId, int strokeIndex)
+        {
+            string writingDir = writingId.Substring(0, writingId.IndexOf('_'));
+            string filename = writingId.Substring(writingId.IndexOf('_') + 1) + ".xml";
+            var file = directory.EnumerateDirectories()
+                .FirstOrDefault(x => x.Name == writerId)
+                ?.EnumerateDirectories()
+                .FirstOrDefault(x => x.Name == writingDir)
+                ?.EnumerateFiles()
+                .FirstOrDefault(x => x.Name == filename);
+            if (file == null)
+            {
+                return null;
+            }
+            XDocument doc;
+            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
+            {
+                doc = XDocument.Load(fileStream);
+            }
+            // Strokes
+            var strokeSetElement = doc.Root.Element("StrokeSet");
+            var stroke = strokeSetElement.Elements("Stroke").ElementAt(strokeIndex);
+            stroke.SetAttributeValue("isHorizontalStroke", null);
+            stroke.SetAttributeValue("strokeDirection", null);
+            XmlWriterSettings settings = new XmlWriterSettings() { Indent = true };
+            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
+            {
+                using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
+                {
+                    doc.Save(writer);
+                }
+            }
+            return "Successful";
+        }
     }
 }
