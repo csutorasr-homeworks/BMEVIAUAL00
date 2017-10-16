@@ -62,15 +62,25 @@ namespace WebInterface.Repository.Writings
             // Strokes
             var strokeSetElement = doc.Root.Element("StrokeSet");
             var strokes = strokeSetElement.Elements("Stroke")
-                .Select(stroke => new Stroke()
-                {
-                    Points = stroke.Elements("Point")
-                        .Select(point => new Point
-                        {
-                            X = Int32.Parse(point.Attribute("x").Value),
-                            Y = Int32.Parse(point.Attribute("y").Value),
-                            Time = point.Attribute("time").Value
-                        })
+                .Select(stroke => {
+                    var isHorizontalStroke = stroke.Attribute("isHorizontalStroke");
+                    var strokeDirection = stroke.Attribute("strokeDirection");
+                    var ret = new Stroke()
+                    {
+                        Points = stroke.Elements("Point")
+                            .Select(point => new Point
+                            {
+                                X = Int32.Parse(point.Attribute("x").Value),
+                                Y = Int32.Parse(point.Attribute("y").Value),
+                                Time = point.Attribute("time").Value
+                            }),
+                        isHorizontal = !(isHorizontalStroke == null || isHorizontalStroke.Value == "false")
+                    };
+                    if (strokeDirection != null)
+                    {
+                        ret.strokeDirection = strokeDirection.Value;
+                    }
+                    return ret;
                 });
             return new Writing()
             {
@@ -107,7 +117,7 @@ namespace WebInterface.Repository.Writings
             stroke.SetAttributeValue("isHorizontalStroke", true);
             stroke.SetAttributeValue("strokeDirection", type);
             XmlWriterSettings settings = new XmlWriterSettings() { Indent = true };
-            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
+            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Truncate))
             {
                 using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
                 {
@@ -142,7 +152,7 @@ namespace WebInterface.Repository.Writings
             stroke.SetAttributeValue("isHorizontalStroke", null);
             stroke.SetAttributeValue("strokeDirection", null);
             XmlWriterSettings settings = new XmlWriterSettings() { Indent = true };
-            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
+            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Truncate))
             {
                 using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
                 {
