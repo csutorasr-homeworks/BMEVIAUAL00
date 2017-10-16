@@ -5,6 +5,8 @@ import 'rxjs/add/operator/map';
 
 const apiEndpoint = '/api';
 
+export type Orientation = 'left' | 'right' | 'unknown';
+
 export interface Writer {
   name: string;
   writings: string[];
@@ -17,6 +19,8 @@ export interface Stroke {
     time: string
   }[];
   color: string;
+  strokeDirection: Orientation;
+  isHorizontal: boolean;
 }
 
 export interface Writing {
@@ -25,6 +29,9 @@ export interface Writing {
   strokes: Stroke[];
   captureTime: Date;
   text: string;
+  calculatedHandedness: Orientation;
+  algorithmLog: string;
+  manualHandedness: Orientation;
 }
 
 @Injectable()
@@ -47,7 +54,8 @@ export class WriterService {
         ...writing,
         strokes: writing.strokes.map(stroke => ({
           color: 'black',
-          ...stroke
+          ...stroke,
+          strokeDirection: (stroke.isHorizontal && !stroke.strokeDirection) ? 'unknown' : stroke.strokeDirection
         }))
       }));
   }
