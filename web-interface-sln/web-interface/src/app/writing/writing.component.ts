@@ -4,6 +4,7 @@ import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/pairwise';
 import 'rxjs/add/operator/share';
+import 'rxjs/add/operator/take';
 
 import { WriterService, Stroke, Orientation } from '../writer.service';
 import { Observable } from 'rxjs/Observable';
@@ -69,6 +70,7 @@ export class WritingComponent implements OnInit {
 
   changeSelectionType(type: Orientation | 'nohorizontal') {
     const subscription = this.activatedRoute.params.combineLatest(this.selected$)
+      .take(1)
       .mergeMap(([params, selected]) => {
         if (Object.keys(selected).length === 0) {
           throw new Error('No selected stroke.');
