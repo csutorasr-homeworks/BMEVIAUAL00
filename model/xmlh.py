@@ -35,6 +35,11 @@ def remove_outlier_points(file_name):
     # Finding the quartiles for outlier detection
     q1, q2, q3 = get_quartiles(linear_data)
 
+    print(linear_data)
+    print(q1)
+    print(q2)
+    print(q3)
+
     outlier = q3 + 1.5*(q3-q1)
 
     tree = ElementTree.parse(file_name)
@@ -123,7 +128,7 @@ def build_structure(file_name):
 
 
 def main():
-    # remove_outlier_points('/home/patrik/strokesz.xml')
+    remove_outlier_points('')
     pass
 
 

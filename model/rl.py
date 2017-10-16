@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ElementTree
 import getpass
 import alg
 import util
+import xmlh
 
 
 window_width = 1280
@@ -123,12 +124,19 @@ class Gui(tk.Frame):
 
         file_menu = Menu(menu)
         file_menu.add_command(label="Load File", command=self.load)
-        file_menu.add_command(label="Save File", command=self.save)
+        file_menu.add_command(label="Remove Error", command=self.clear)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.gui_root.quit)
         menu.add_cascade(label="File", menu=file_menu)
 
         self.gui_root.config(menu=menu)
+
+    def clear(self):
+        if self.file_name is not None:
+            xmlh.remove_outlier_points(self.file_name)
+            self.alg = alg.Algorithm(self.file_name)
+            self.extract_data(self.file_name)
+            self.update()
 
     def update(self):
         self.canvas.delete('all')
@@ -171,7 +179,7 @@ class Gui(tk.Frame):
     def load(self):
         user = getpass.getuser()
         file_name = askopenfilename(filetypes=(("XML files", "*.xml"), ("All files", "*.*")),
-                                    initialdir='/media/patrik/1EDB65B8599DD93E/Data/Erika/Data')
+                                    initialdir='/home/patrik/Desktop/TestStrokes')
         if file_name:
             try:
                 self.alg = alg.Algorithm(str(file_name))
@@ -208,9 +216,6 @@ class Gui(tk.Frame):
 
             self.strokes.append(util.Stroke(float(stroke.attrib['start_time']), float(stroke.attrib['end_time']),
                                             coordinates=coordinates))
-
-    def save(self):
-        pass
 
 
 def main():
