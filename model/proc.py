@@ -25,41 +25,6 @@ data = []
 horizontal_strokes = []
 
 
-def point_2_point(point_a, point_b):
-    """
-    Distance between two points.
-    :param point_a: First point.
-    :param point_b: Second point.
-    :return: Distance of the points.
-    """
-    return math.sqrt((point_a.x-point_b.x)**2+(point_a.y-point_b.y)**2)
-
-
-def point_2_line(point_a, point_b, point):
-    """
-    Distance between a point and a line.
-    :param point_a: First point of the vector.
-    :param point_b: Second point of the vector.
-    :param point: The point, which distance is to be measured from the line.
-    :return: Distance of the point from the line.
-    """
-    return (math.fabs(-(point_b.y-point_a.y)*point.x + (point_b.x-point_a.x)*point.y + (point_b.y-point_a.y)*point_a.x -
-            (point_b.x - point_a.x)*point_a.y))/math.sqrt((point_b.x-point_a.x)**2+(point_b.y-point_a.y)**2)
-
-
-def calculate_angle(point_a, point_b):
-    """
-    Calculates the included angle (degrees) of a vector and horizontal line.
-    :param point_a: First point of the vector.
-    :param point_b: Second point.
-    :return: The included angle (degrees) of the vector, defined by the points,
-     and a horizontal line.
-    """
-    vector = util.Point(point_b.x-point_a.x, point_b.y-point_a.y)
-    n_vector = util.Point(vector.x / vector.length, vector.y / vector.length)
-    return math.degrees(math.acos(n_vector.x))
-
-
 def get_stroke_parameters(stroke, file_index, stroke_index):
     """
     Calculates the parameters of a stroke and concatenates it with the predetermined horizontal value.
@@ -82,17 +47,17 @@ def get_stroke_parameters(stroke, file_index, stroke_index):
         for index in range(len(stroke)):
             try:
                 if index in range(0, len(stroke)-1):
-                    stroke_length += point_2_point(stroke[index], stroke[index+1])
-                    avg_degree += math.fabs(calculate_angle(stroke[0], stroke[index+1])) / (len(stroke)-1)
+                    stroke_length += util.point_2_point(stroke[index], stroke[index+1])
+                    avg_degree += math.fabs(util.calculate_angle(stroke[0], stroke[index+1])) / (len(stroke)-1)
                 if index in range(1, len(stroke)-1):
                     # Average distance of the stroke's points from the line,
                     # that connects the first and the final point.
-                    d_line_avg_distance += point_2_line(stroke[0], stroke[-1], stroke[index]) / (len(stroke)-2)
+                    d_line_avg_distance += util.point_2_line(stroke[0], stroke[-1], stroke[index]) / (len(stroke)-2)
                 if index in range(1, len(stroke)):
                     # Average distance of the stroke's points from the horizontal line,
                     # that goes through the first point.
-                    h_line_avg_distance += point_2_line(stroke[0], util.Point(stroke[0].x + 1, stroke[0].y),
-                                                        stroke[index])/(len(stroke)-1)
+                    h_line_avg_distance += util.point_2_line(stroke[0], util.Point(stroke[0].x + 1, stroke[0].y),
+                                                             stroke[index])/(len(stroke)-1)
 
             except ZeroDivisionError:
                 # In case of division error, that occurs during the calculation of the angle (due to faulty xml data)
@@ -120,7 +85,7 @@ def parse_files(location):
                 strokes = []
                 # root[3] marks the StrokeSet tag of the xml, which contains the list of strokes.
                 # Each stroke has a set of x,y coordinates that describe the curve.
-                for stroke in root[3]:
+                for stroke in root.find('StrokeSet'):
                     strokes.append([(util.Point(float(point.attrib['x']),
                                                 float(point.attrib['y']))) for point in stroke])
                 data.append(strokes)
@@ -192,7 +157,7 @@ def save_statistics(location, stat):
     pickle.dump(stat, open(location, 'wb'))
 
 
-def mark_data(location):
+def load_marked_strokes(location):
     """
     Loads the predetermined horizontal values.
     :param location: The absolute path of the file, containing the output of the manual examination
@@ -209,7 +174,7 @@ def main():
     pass
     #
     # parse_files('/media/patrik/1EDB65B8599DD93E/Downloads/TestData')
-    # mark_data('/media/patrik/1EDB65B8599DD93E/PycharmProjects/RightLeft/hstrokes.txt')
+    # load_marked_strokes('/media/patrik/1EDB65B8599DD93E/PycharmProjects/RightLeft/hstrokes.txt')
     # save_statistics('/media/patrik/1EDB65B8599DD93E/PycharmProjects/stat',
     #                np.array(clear_faulty_data(create_stroke_statistics())))
     #

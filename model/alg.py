@@ -1,7 +1,7 @@
-import xml.etree.ElementTree as ElementTree
 import numpy as np
 import math
 import util
+import xmlh
 import sys
 from keras.models import load_model
 from sklearn import preprocessing
@@ -29,60 +29,12 @@ class Algorithm:
         :return:
         """
         try:
-            file = open(file_name, 'r')
-
-            tree = ElementTree.parse(file)
-            root = tree.getroot()
-
-            self.text_lines = [text_line.attrib['text'] for text_line in root[1][1:]]
-
-            self.strokes = []
-            # root[3] marks the StrokeSet tag in the xml.
-            for i in range(len(root[3])):
-                self.strokes.append([(util.Point(float(point.attrib['x']), float(point.attrib['y'])))
-                                     for point in root[3][i][:]])
+            self.strokes = xmlh.build_structure(file_name)
 
         except IOError as e:
             print('I/O error({0}): {1}.'.format(e.errno, e.strerror))
 
         self.h_line_indexes = self.predict(self.standardize_input(self.create_stroke_statistics()))
-
-    @staticmethod
-    def point_2_point(point_a, point_b):
-        """
-        Distance between two points.
-        :param point_a: First point.
-        :param point_b: Second point.
-        :return: Distance of the points.
-        """
-        return math.sqrt((point_a.x - point_b.x) ** 2 + (point_a.y - point_b.y) ** 2)
-
-    @staticmethod
-    def point_2_line(point_a, point_b, point):
-        """
-        Distance between a point and a line.
-        :param point_a: First point of the vector.
-        :param point_b: Second point of the vector.
-        :param point: The point, which distance is to be measured from the line.
-        :return: Distance of the point from the line.
-        """
-        return (math.fabs(-(point_b.y - point_a.y) * point.x + (point_b.x - point_a.x) * point.y +
-                          (point_b.y - point_a.y) * point_a.x -
-                          (point_b.x - point_a.x) * point_a.y)) / math.sqrt(
-            (point_b.x - point_a.x) ** 2 + (point_b.y - point_a.y) ** 2)
-
-    @staticmethod
-    def calculate_angle(point_a, point_b):
-        """
-        Calculates the included angle (degrees) of a vector and horizontal line.
-        :param point_a: First point of the vector.
-        :param point_b: Second point.
-        :return: The included angle (degrees) of the vector, defined by the points,
-         and a horizontal line.
-        """
-        vector = util.Point(point_b.x - point_a.x, point_b.y - point_a.y)
-        n_vector = util.Point(vector.x / vector.length, vector.y / vector.length)
-        return math.degrees(math.acos(n_vector.x))
 
     def predict(self, stroke_params):
         """
@@ -106,7 +58,8 @@ class Algorithm:
     def get_horizontal_lines(self):
         return self.h_line_indexes
 
-    def get_stroke_parameters(self, stroke):
+    @staticmethod
+    def get_stroke_parameters(stroke):
         """
         Calculates the parameters of a stroke and concatenates it
         with the predetermined horizontal value.
@@ -127,19 +80,20 @@ class Algorithm:
             for index in range(len(stroke)):
                 try:
                     if index in range(0, len(stroke) - 1):
-                        stroke_length += self.point_2_point(stroke[index], stroke[index + 1])
-                        avg_degree += math.fabs(self.calculate_angle(stroke[0], stroke[index + 1])) / (len(stroke) - 1)
+                        stroke_length += util.point_2_point(stroke[index][0], stroke[index + 1][0])
+                        avg_degree += math.fabs(util.calculate_angle(stroke[0][0],
+                                                                     stroke[index + 1][0])) / (len(stroke) - 1)
                     if index in range(1, len(stroke) - 1):
                         # Average distance of the stroke's points from the line,
                         # that connects the first and the final point.
-                        d_line_avg_distance += self.point_2_line(stroke[0], stroke[-1],
-                                                                 stroke[index]) / (len(stroke) - 2)
+                        d_line_avg_distance += util.point_2_line(stroke[0][0], stroke[-1][0],
+                                                                 stroke[index][0]) / (len(stroke) - 2)
                     if index in range(1, len(stroke)):
                         # Average distance of the stroke's points from the horizontal line,
                         # that goes through the first point.
                         h_line_avg_distance += \
-                            self.point_2_line(stroke[0], util.Point(stroke[0].x + 1, stroke[0].y),
-                                              stroke[index]) / (len(stroke) - 1)
+                            util.point_2_line(stroke[0][0], util.Point(stroke[0][0].x + 1, stroke[0][0].y),
+                                              stroke[index][0]) / (len(stroke) - 1)
 
                 except ZeroDivisionError:
                     # In case of division error, that occurs during the calculation of the angle
@@ -208,7 +162,7 @@ class Algorithm:
     def determine_handedness(self):
         line_dir = []
         for index in self.h_line_indexes:
-            if self.strokes[int(index)][0].x < self.strokes[int(index)][-1].x:
+            if self.strokes[int(index)][0][0].x < self.strokes[int(index)][-1][0].x:
                 line_dir.append(False)
             else:
                 line_dir.append(True)
