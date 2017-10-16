@@ -1,6 +1,6 @@
 <div class="navigator">
   <a [routerLink]="'/writer/' + (writerId$ | async)">Choose another writing</a>
-  <a [routerLink]="nextLink$ | async" #next>Next Writing</a>
+  <a [routerLink]="nextLink$ | async" #next>Next Writing (R)</a>
 </div>
 <app-dropdown tooltip="Click to show more about the writer.">
   <app-writing-data-changer [text$]="text$" [log$]="log$" [manualHandedness$]="manualHandedness$" (changeManualHandedness)="changeManualHandedness($event)"
