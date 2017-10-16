@@ -38,7 +38,11 @@ namespace WebInterface.Repository.Writings
             {
                 return null;
             }
-            XDocument doc = XDocument.Load(file.OpenRead());
+            XDocument doc;
+            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
+            {
+                doc = XDocument.Load(fileStream);
+            }
             // General info
             var generalElement = doc.Root.Element("General");
             // Capture time
