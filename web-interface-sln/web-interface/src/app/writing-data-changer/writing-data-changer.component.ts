@@ -2,6 +2,7 @@ import { Component, OnInit, Input, OnDestroy, Output, EventEmitter } from '@angu
 import { Observable } from 'rxjs/Observable';
 import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
+import { Orientation } from '../writer.service';
 
 @Component({
   selector: 'app-writing-data-changer',
@@ -12,7 +13,8 @@ export class WritingDataChangerComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   @Input() text$: Observable<string>;
   @Input() log$: Observable<string>;
-  @Input() manualHandedness$: Observable<string>;
+  @Input() manualHandedness$: Observable<Orientation>;
+  @Input() calculatedHandedness$: Observable<Orientation>;
   @Output() changeManualHandedness = new EventEmitter();
   manualHandedness = new FormControl();
 
