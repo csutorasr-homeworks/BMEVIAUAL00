@@ -7,6 +7,7 @@ import 'rxjs/add/operator/combineLatest';
 
 import { Stroke } from '../writer.service';
 import { Subscription } from 'rxjs/Subscription';
+import { Hotkey, HotkeysService } from 'angular2-hotkeys';
 
 @Component({
   selector: 'app-stroke-data-changer',
@@ -20,9 +21,30 @@ export class StrokeDataChangerComponent implements OnInit, OnDestroy {
   @Input() strokes$: Observable<Stroke[]>;
   @Output() changeType = new EventEmitter();
 
+  hotheys: Hotkey[] = [
+    new Hotkey('q', (event) => {
+      this.select.setValue('nohorizontal');
+      this.valueChanged();
+      event.preventDefault();
+      return false;
+    }),
+    new Hotkey('w', (event) => {
+      this.select.setValue('left');
+      this.valueChanged();
+      event.preventDefault();
+      return false;
+    }),
+    new Hotkey('e', (event) => {
+      this.select.setValue('right');
+      this.valueChanged();
+      event.preventDefault();
+      return false;
+    })
+  ];
+
   select = new FormControl();
 
-  constructor() { }
+  constructor(private hotkeysService: HotkeysService) { }
 
   ngOnInit() {
     this.isSelected$ = this.selected$.map(x => Object.keys(x).length !== 0);
@@ -37,10 +59,13 @@ export class StrokeDataChangerComponent implements OnInit, OnDestroy {
         this.select.patchValue('nohorizontal');
       }
     });
+    // set up hotkeys
+    this.hotkeysService.add(this.hotheys);
   }
 
   ngOnDestroy(): void {
     this.valueSubscription.unsubscribe();
+    this.hotkeysService.remove(this.hotheys);
   }
 
   valueChanged() {
