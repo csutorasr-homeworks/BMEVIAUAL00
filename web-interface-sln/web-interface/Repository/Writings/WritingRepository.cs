@@ -26,23 +26,8 @@ namespace WebInterface.Repository.Writings
         /// <returns>The writing</returns>
         Writing IWritingRepository.Get(string writerId, string writingId)
         {
-            string writingDir = writingId.Substring(0, writingId.IndexOf('_'));
-            string filename = writingId.Substring(writingId.IndexOf('_') + 1) + ".xml";
-            var file = directory.EnumerateDirectories()
-                .FirstOrDefault(x => x.Name == writerId)
-                ?.EnumerateDirectories()
-                .FirstOrDefault(x => x.Name == writingDir)
-                ?.EnumerateFiles()
-                .FirstOrDefault(x => x.Name == filename);
-            if (file == null)
-            {
-                return null;
-            }
-            XDocument doc;
-            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
-            {
-                doc = XDocument.Load(fileStream);
-            }
+            var file = OpenFile(writerId, writingId);
+            XDocument doc = ReadXML(file);
             // General info
             var generalElement = doc.Root.Element("General");
             // Capture time
@@ -109,94 +94,34 @@ namespace WebInterface.Repository.Writings
 
         public object SetLine(string writerId, string writingId, int strokeIndex, string type)
         {
-            string writingDir = writingId.Substring(0, writingId.IndexOf('_'));
-            string filename = writingId.Substring(writingId.IndexOf('_') + 1) + ".xml";
-            var file = directory.EnumerateDirectories()
-                .FirstOrDefault(x => x.Name == writerId)
-                ?.EnumerateDirectories()
-                .FirstOrDefault(x => x.Name == writingDir)
-                ?.EnumerateFiles()
-                .FirstOrDefault(x => x.Name == filename);
-            if (file == null)
-            {
-                return null;
-            }
-            XDocument doc;
-            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
-            {
-                doc = XDocument.Load(fileStream);
-            }
-            // Strokes
+            var file = OpenFile(writerId, writingId);
+            XDocument doc = ReadXML(file);
             var strokeSetElement = doc.Root.Element("StrokeSet");
             var stroke = strokeSetElement.Elements("Stroke").ElementAt(strokeIndex);
             stroke.SetAttributeValue("isHorizontalStroke", true);
             stroke.SetAttributeValue("strokeDirection", type);
             XmlWriterSettings settings = new XmlWriterSettings() { Indent = true };
-            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Truncate))
-            {
-                using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
-                {
-                    doc.Save(writer);
-                }
-            }
+            this.WriteXML(file, doc);
             return "Successful";
         }
 
         public object RemoveLine(string writerId, string writingId, int strokeIndex)
         {
-            string writingDir = writingId.Substring(0, writingId.IndexOf('_'));
-            string filename = writingId.Substring(writingId.IndexOf('_') + 1) + ".xml";
-            var file = directory.EnumerateDirectories()
-                .FirstOrDefault(x => x.Name == writerId)
-                ?.EnumerateDirectories()
-                .FirstOrDefault(x => x.Name == writingDir)
-                ?.EnumerateFiles()
-                .FirstOrDefault(x => x.Name == filename);
-            if (file == null)
-            {
-                return null;
-            }
-            XDocument doc;
-            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
-            {
-                doc = XDocument.Load(fileStream);
-            }
-            // Strokes
+            var file = OpenFile(writerId, writingId);
+            XDocument doc = ReadXML(file);
             var strokeSetElement = doc.Root.Element("StrokeSet");
             var stroke = strokeSetElement.Elements("Stroke").ElementAt(strokeIndex);
             stroke.SetAttributeValue("isHorizontalStroke", null);
             stroke.SetAttributeValue("strokeDirection", null);
             XmlWriterSettings settings = new XmlWriterSettings() { Indent = true };
-            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Truncate))
-            {
-                using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
-                {
-                    doc.Save(writer);
-                }
-            }
+            this.WriteXML(file, doc);
             return "Successful";
         }
 
         public object Set(string writerId, string writingId, string type)
         {
-            string writingDir = writingId.Substring(0, writingId.IndexOf('_'));
-            string filename = writingId.Substring(writingId.IndexOf('_') + 1) + ".xml";
-            var file = directory.EnumerateDirectories()
-                .FirstOrDefault(x => x.Name == writerId)
-                ?.EnumerateDirectories()
-                .FirstOrDefault(x => x.Name == writingDir)
-                ?.EnumerateFiles()
-                .FirstOrDefault(x => x.Name == filename);
-            if (file == null)
-            {
-                return null;
-            }
-            XDocument doc;
-            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
-            {
-                doc = XDocument.Load(fileStream);
-            }
-            // General info
+            var file = OpenFile(writerId, writingId);
+            XDocument doc = ReadXML(file);
             var generalElement = doc.Root.Element("General");
             var resultElement = generalElement.Element("Result");
             if (resultElement == null)
@@ -205,6 +130,35 @@ namespace WebInterface.Repository.Writings
                 generalElement.Add(resultElement);
             }
             resultElement.SetAttributeValue("ManualHandedness", type);
+            this.WriteXML(file, doc);
+            return "Successful";
+        }
+
+        private FileInfo OpenFile(string writerId, string writingId)
+        {
+            string writingDir = writingId.Substring(0, writingId.IndexOf('_'));
+            string filename = writingId.Substring(writingId.IndexOf('_') + 1) + ".xml";
+            var file = directory.EnumerateDirectories()
+                .FirstOrDefault(x => x.Name == writerId)
+                ?.EnumerateDirectories()
+                .FirstOrDefault(x => x.Name == writingDir)
+                ?.EnumerateFiles()
+                .FirstOrDefault(x => x.Name == filename);
+            return file;
+        }
+
+        private XDocument ReadXML(FileInfo file)
+        {
+            XDocument doc;
+            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
+            {
+                doc = XDocument.Load(fileStream);
+            }
+            return doc;
+        }
+
+        private void WriteXML(FileInfo file, XDocument doc)
+        {
             XmlWriterSettings settings = new XmlWriterSettings() { Indent = true };
             using (FileStream fileStream = new FileStream(file.FullName, FileMode.Truncate))
             {
@@ -213,7 +167,6 @@ namespace WebInterface.Repository.Writings
                     doc.Save(writer);
                 }
             }
-            return "Successful";
         }
     }
 }
