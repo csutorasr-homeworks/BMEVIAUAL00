@@ -53,11 +53,23 @@ export class WriterService {
       .map((writing: Writing) => ({
         ...writing,
         strokes: writing.strokes.map(stroke => ({
-          color: 'black',
+          color: this.getStrokeColor(stroke),
           ...stroke,
           strokeDirection: (stroke.isHorizontal && !stroke.strokeDirection) ? 'unknown' : stroke.strokeDirection
         }))
       }));
+  }
+
+  getStrokeColor(stroke: Stroke) {
+    if (stroke.isHorizontal) {
+      if (stroke.strokeDirection === 'left') {
+        return 'green';
+      }
+      if (stroke.strokeDirection === 'right') {
+        return 'blue';
+      }
+    }
+    return 'black';
   }
 
   removeHorizontalLine(writerId: string, writingId: string, lineIndex: number) {
