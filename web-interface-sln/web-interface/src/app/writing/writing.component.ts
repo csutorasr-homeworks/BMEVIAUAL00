@@ -15,6 +15,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
   styleUrls: ['./writing.component.css']
 })
 export class WritingComponent implements OnInit {
+  nextLink$: Observable<string>;
   reloadSubject: BehaviorSubject<{}>;
   calculatedHandedness$: Observable<Orientation>;
   manualHandedness$: Observable<Orientation>;
@@ -46,6 +47,7 @@ export class WritingComponent implements OnInit {
     this.manualHandedness$ = writing$.map(x => x.manualHandedness);
     this.calculatedHandedness$ = writing$.map(x => x.calculatedHandedness);
     this.strokes$ = writing$.map(x => x.strokes);
+    this.nextLink$ = this.writerService.getNext(this.writerId$, writing$.map(x => x.writingId));
   }
 
   changeZoom(zoom) {
