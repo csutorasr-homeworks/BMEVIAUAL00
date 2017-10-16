@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/pairwise';
 import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/take';
+import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 
 import { WriterService, Stroke, Orientation } from '../writer.service';
 import { Observable } from 'rxjs/Observable';
@@ -15,7 +16,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
   templateUrl: './writing.component.html',
   styleUrls: ['./writing.component.css']
 })
-export class WritingComponent implements OnInit {
+export class WritingComponent implements OnInit, OnDestroy {
   nextLink$: Observable<string>;
   reloadSubject: BehaviorSubject<{}>;
   calculatedHandedness$: Observable<Orientation>;
@@ -28,8 +29,17 @@ export class WritingComponent implements OnInit {
   zoom$: Observable<number>;
   selectedSubject: BehaviorSubject<{ [key: string]: string }>;
   selected$: Observable<{ [key: string]: string; }>;
+  @ViewChild('next') next: ElementRef;
+  hotheys: Hotkey[] = [
+    new Hotkey('r', (event) => {
+      this.next.nativeElement.click();
+      event.preventDefault();
+      return false;
+    })
+  ];
 
-  constructor(private activatedRoute: ActivatedRoute, private writerService: WriterService, private router: Router) { }
+  constructor(private activatedRoute: ActivatedRoute, private writerService: WriterService, private router: Router,
+    private hotkeysService: HotkeysService) { }
 
   ngOnInit() {
     this.selectedSubject = new BehaviorSubject({});
@@ -51,6 +61,11 @@ export class WritingComponent implements OnInit {
     this.calculatedHandedness$ = writing$.map(x => x.calculatedHandedness);
     this.strokes$ = writing$.map(x => x.strokes);
     this.nextLink$ = this.writerService.getNext(this.writerId$, writing$.map(x => x.writingId));
+    // set up hotkeys
+    this.hotkeysService.add(this.hotheys);
+  }
+  ngOnDestroy(): void {
+    this.hotkeysService.remove(this.hotheys);
   }
 
   changeZoom(zoom) {
