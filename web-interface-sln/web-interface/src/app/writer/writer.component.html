@@ -1,8 +1,11 @@
 <a routerLink="/">Choose another writer</a>
-<ng-container>
+<div *ngIf="!(writerWritings$ | async)">
+  Loading...
+</div>
+<ng-container *ngIf="writerWritings$ | async">
   <h2>{{writerName$ | async}}</h2>
   <select (change)="changed($event.target.value)">
-    <option [value]="null">Choose!</option>
+    <option [value]="null">Choose a writing!</option>
     <option *ngFor="let writing of (writerWritings$ | async)" [value]="writing">{{writing}}</option>
   </select>
 </ng-container>
