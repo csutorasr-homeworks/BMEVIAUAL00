@@ -9,7 +9,8 @@
   <tr>
     <td>Manual Handedness:</td>
     <td>
-      <select>
+      <select [formControl]="manualHandedness" (change)="manualHandednessChanged()">
+        <option value="default" disabled="disabled">Default</option>
         <option value="left">Left</option>
         <option value="right">Right</option>
         <option value="unknown">Unknown</option>

@@ -15,6 +15,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
   styleUrls: ['./writing.component.css']
 })
 export class WritingComponent implements OnInit {
+  manualHandedness$: Observable<Orientation>;
   log$: Observable<string>;
   strokes$: Observable<Stroke[]>;
   text$: Observable<string>;
@@ -39,6 +40,7 @@ export class WritingComponent implements OnInit {
     this.writerId$ = writing$.map(x => x.writerId);
     this.text$ = writing$.map(x => x.text);
     this.log$ = writing$.map(x => x.algorithmLog);
+    this.manualHandedness$ = writing$.map(x => x.manualHandedness);
     this.strokes$ = writing$.map(x => x.strokes);
   }
 
@@ -67,5 +69,11 @@ export class WritingComponent implements OnInit {
           this.writerService.addHorizontalLine(params.writerId, params.writingId, +lineIndex, type);
         }
       }).unsubscribe();
+  }
+
+  changeManualHandedness(type: Orientation) {
+    this.activatedRoute.params.subscribe(params => {
+      this.writerService.changeManualHandedness(params.writerId, params.writingId, type);
+    }).unsubscribe();
   }
 }

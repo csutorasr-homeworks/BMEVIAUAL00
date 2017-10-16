@@ -68,4 +68,7 @@ export class WriterService {
     console.log(`${apiEndpoint}/writers/${writerId}/${writingId}/lines/${lineIndex}`, type);
   }
 
+  changeManualHandedness(writerId: string, writingId: string, type: Orientation) {
+    console.log(`${apiEndpoint}/writers/${writerId}/${writingId}`, type);
+  }
 }

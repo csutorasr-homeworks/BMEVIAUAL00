@@ -2,7 +2,7 @@
   <a [routerLink]="'/writer/' + (writerId$ | async)">Choose another writing</a>
   <a>Next Writing</a>
 </div>
-<app-writing-data-changer [text$]="text$" [log$]="log$"></app-writing-data-changer>
+<app-writing-data-changer [text$]="text$" [log$]="log$" [manualHandedness$]="manualHandedness$" (changeManualHandedness)="changeManualHandedness($event)"></app-writing-data-changer>
 <h3>Writing:</h3>
 <app-zoom (zoom$)="changeZoom($event)"></app-zoom>
 <app-stroke-data-changer [strokes$]="strokes$" [selected$]="selected$" (changeType)="changeSelectionType($event)"></app-stroke-data-changer>
