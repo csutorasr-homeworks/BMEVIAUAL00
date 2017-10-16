@@ -132,7 +132,6 @@ export class WriterService {
           .mergeMap(() => this.getWriter(writerId))
           .map(() => [writerId, writingId]);
       })
-      .do(() => console.log(this.nextCache))
       .map(([writerId, writingId]) => this.nextCache[writerId][writingId]);
   }
 }
