@@ -9,5 +9,6 @@ namespace WebInterface.Repository.Writings
     public interface IWritingRepository
     {
         Writing Get(string writerId, string writingId);
+        object SetLine(string writerId, string writingId, int strokeIndex, string type);
     }
 }
