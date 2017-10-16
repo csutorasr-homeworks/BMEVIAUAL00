@@ -7,4 +7,4 @@
 <h3>Writing:</h3>
 <app-zoom (zoom$)="changeZoom($event)"></app-zoom>
 <app-stroke-data-changer [strokes$]="strokes$" [selected$]="selected$" (changeType)="changeSelectionType($event)"></app-stroke-data-changer>
-<app-writing-visualizer [strokes$]="strokes$" [zoom$]="zoom$" [selected$]="selected$" (selected)="selected($event)"></app-writing-visualizer>
+<app-writing-visualizer [strokes$]="strokes$" [zoom$]="zoom$" [selected$]="selected$" (selected)="changeSelected($event)"></app-writing-visualizer>

@@ -52,11 +52,15 @@ export class WritingComponent implements OnInit {
     this.zoomSubject.next(zoom);
   }
 
-  selected(index) {
-    // single select
-    this.selectedSubject.next({
-      [index]: 'red'
-    });
+  changeSelected(index?) {
+    if (index) {
+      // single select
+      this.selectedSubject.next({
+        [index]: 'red'
+      });
+    } else {
+      this.selectedSubject.next({});
+    }
   }
 
   changeSelectionType(type: Orientation | 'nohorizontal') {
@@ -74,6 +78,7 @@ export class WritingComponent implements OnInit {
         }
       }).subscribe(() => {
         this.reloadSubject.next({});
+        this.changeSelected();
         subscription.unsubscribe();
       });
   }
@@ -83,6 +88,7 @@ export class WritingComponent implements OnInit {
       return this.writerService.changeManualHandedness(params.writerId, params.writingId, type);
     }).subscribe(x => {
       this.reloadSubject.next({});
+      this.changeSelected();
       subscription.unsubscribe();
     });
   }
