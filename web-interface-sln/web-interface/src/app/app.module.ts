@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HotkeyModule } from 'angular2-hotkeys';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -31,7 +32,8 @@ import { WritingDataChangerComponent } from './writing-data-changer/writing-data
     RouterModule,
     HttpModule,
     AppRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HotkeyModule.forRoot()
   ],
   providers: [
     WriterService
