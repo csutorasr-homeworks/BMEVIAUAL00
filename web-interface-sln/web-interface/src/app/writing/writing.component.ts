@@ -15,6 +15,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
   styleUrls: ['./writing.component.css']
 })
 export class WritingComponent implements OnInit {
+  reloadSubject: BehaviorSubject<{}>;
   calculatedHandedness$: Observable<Orientation>;
   manualHandedness$: Observable<Orientation>;
   log$: Observable<string>;
@@ -35,8 +36,9 @@ export class WritingComponent implements OnInit {
     this.zoomSubject = new BehaviorSubject(0.1);
     this.zoom$ = this.zoomSubject.asObservable();
     // load writing
-    const writing$ = this.activatedRoute.params
-      .mergeMap(x => this.writerService.getWriting(x.writerId, x.writingId)).share();
+    this.reloadSubject = new BehaviorSubject({});
+    const writing$ = this.activatedRoute.params.combineLatest(this.reloadSubject.asObservable())
+      .mergeMap(([x]) => this.writerService.getWriting(x.writerId, x.writingId)).share();
     // set data for bindings
     this.writerId$ = writing$.map(x => x.writerId);
     this.text$ = writing$.map(x => x.text);
@@ -67,8 +69,10 @@ export class WritingComponent implements OnInit {
         // Do the operation
         if (type === 'nohorizontal') {
           this.writerService.removeHorizontalLine(params.writerId, params.writingId, +lineIndex);
+          this.reloadSubject.next({});
         } else {
           this.writerService.addHorizontalLine(params.writerId, params.writingId, +lineIndex, type);
+          this.reloadSubject.next({});
         }
       }).unsubscribe();
   }
@@ -76,6 +80,7 @@ export class WritingComponent implements OnInit {
   changeManualHandedness(type: Orientation) {
     this.activatedRoute.params.subscribe(params => {
       this.writerService.changeManualHandedness(params.writerId, params.writingId, type);
+      this.reloadSubject.next({});
     }).unsubscribe();
   }
 }
