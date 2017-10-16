@@ -26,6 +26,7 @@ export class WritingComponent implements OnInit {
 
   ngOnInit() {
     this.selectedSubject = new BehaviorSubject({});
+    this.selected$ = this.selectedSubject.asObservable();
     // setup zoom
     this.zoomSubject = new BehaviorSubject(0.1);
     this.zoom$ = this.zoomSubject.asObservable();
@@ -36,7 +37,6 @@ export class WritingComponent implements OnInit {
     this.writerId$ = writing$.map(x => x.writerId);
     this.text$ = writing$.map(x => x.text);
     this.strokes$ = writing$.map(x => x.strokes);
-    this.selected$ = this.selectedSubject.asObservable();
   }
 
   changeZoom(zoom) {
@@ -44,13 +44,10 @@ export class WritingComponent implements OnInit {
   }
 
   selected(index) {
-    const newValue = this.selectedSubject.value;
-    if (index in newValue) {
-      delete newValue[index];
-    } else {
-      newValue[index] = 'red';
-    }
-    this.selectedSubject.next(newValue);
+    // single select
+    this.selectedSubject.next({
+      [index]: 'red'
+    });
   }
 
   changeSelectionType() {
