@@ -1,0 +1,23 @@
+div {
+    display: flex;
+    align-items: center;
+}
+
+div div {
+    padding: 0 1em;
+}
+
+button {
+    border: 1em solid transparent;
+    border-right-width: 0;
+    border-left: 1.5em black solid;
+    width: 0;
+    height: 0;
+    padding: 0;
+    transition: 0.25s all;
+    background: transparent;
+}
+
+button.show {
+    transform: rotate(90deg);
+}

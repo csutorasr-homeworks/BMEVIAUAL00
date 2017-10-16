@@ -15,6 +15,7 @@ import { WritingVisualizerComponent } from './writing-visualizer/writing-visuali
 import { ZoomComponent } from './zoom/zoom.component';
 import { StrokeDataChangerComponent } from './stroke-data-changer/stroke-data-changer.component';
 import { WritingDataChangerComponent } from './writing-data-changer/writing-data-changer.component';
+import { DropdownComponent } from './dropdown/dropdown.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { WritingDataChangerComponent } from './writing-data-changer/writing-data
     WritingVisualizerComponent,
     ZoomComponent,
     StrokeDataChangerComponent,
-    WritingDataChangerComponent
+    WritingDataChangerComponent,
+    DropdownComponent
   ],
   imports: [
     BrowserModule,
