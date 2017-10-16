@@ -12,5 +12,8 @@ namespace WebInterface.Model
         public IEnumerable<Stroke> Strokes { get; set; }
         public DateTime CaptureTime { get; internal set; }
         public string Text { get; internal set; }
+        public string CalculatedHandedness { get; set; }
+        public string AlgorithmLog { get; set; }
+        public string ManualHandedness { get; set; }
     }
 }

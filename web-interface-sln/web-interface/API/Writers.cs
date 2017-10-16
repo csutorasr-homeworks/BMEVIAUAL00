@@ -38,6 +38,21 @@ namespace WebInterface.API
         {
             return writingRepository.Get(id, writingId);
         }
+        [HttpPut("{id}/{writingId}")]
+        public IActionResult Put(string id, string writingId, [FromBody] ManualHandednessData data)
+        {
+            if (data.manualHandedness == null)
+            {
+                return StatusCode((int)HttpStatusCode.BadRequest, "No type is specified");
+            }
+            return Ok(writingRepository.Set(id, writingId, data.manualHandedness));
+        }
+
+        public class ManualHandednessData
+        {
+            public string manualHandedness { get; set; }
+        }
+
         [HttpPut("{id}/{writingId}/lines/{index}")]
         public IActionResult PutLine(string id, string writingId, int index, [FromBody] TypeRequestData data)
         {

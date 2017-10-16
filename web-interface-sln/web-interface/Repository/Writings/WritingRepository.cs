@@ -53,12 +53,7 @@ namespace WebInterface.Repository.Writings
             // Transcription
             var transcriptionElement = doc.Root.Element("Transcription");
             var textElement = transcriptionElement.Element("Text");
-            string text;
-            using (var reader = textElement.CreateReader())
-            {
-                reader.MoveToContent();
-                text = reader.ReadInnerXml().Trim();
-            }
+            string text = textElement.Value;
             // Strokes
             var strokeSetElement = doc.Root.Element("StrokeSet");
             var strokes = strokeSetElement.Elements("Stroke")
@@ -82,7 +77,7 @@ namespace WebInterface.Repository.Writings
                     }
                     return ret;
                 });
-            return new Writing()
+            var writer = new Writing()
             {
                 WriterId = writerId,
                 WritingId = writingId,
@@ -90,6 +85,26 @@ namespace WebInterface.Repository.Writings
                 Text = text,
                 Strokes = strokes
             };
+            var resultElement = generalElement.Element("Result");
+            if (resultElement != null)
+            {
+                var CalculatedHandedness = resultElement.Attribute("CalculatedHandedness");
+                if (CalculatedHandedness != null)
+                {
+                    writer.CalculatedHandedness = CalculatedHandedness.Value;
+                }
+                var ManualHandedness = resultElement.Attribute("ManualHandedness");
+                if (ManualHandedness != null)
+                {
+                    writer.ManualHandedness = ManualHandedness.Value;
+                }
+                var AlgorithmLog = resultElement.Attribute("AlgorithmLog");
+                if (AlgorithmLog != null)
+                {
+                    writer.ManualHandedness = AlgorithmLog.Value;
+                }
+            }
+            return writer;
         }
 
         public object SetLine(string writerId, string writingId, int strokeIndex, string type)
@@ -151,6 +166,45 @@ namespace WebInterface.Repository.Writings
             var stroke = strokeSetElement.Elements("Stroke").ElementAt(strokeIndex);
             stroke.SetAttributeValue("isHorizontalStroke", null);
             stroke.SetAttributeValue("strokeDirection", null);
+            XmlWriterSettings settings = new XmlWriterSettings() { Indent = true };
+            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Truncate))
+            {
+                using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
+                {
+                    doc.Save(writer);
+                }
+            }
+            return "Successful";
+        }
+
+        public object Set(string writerId, string writingId, string type)
+        {
+            string writingDir = writingId.Substring(0, writingId.IndexOf('_'));
+            string filename = writingId.Substring(writingId.IndexOf('_') + 1) + ".xml";
+            var file = directory.EnumerateDirectories()
+                .FirstOrDefault(x => x.Name == writerId)
+                ?.EnumerateDirectories()
+                .FirstOrDefault(x => x.Name == writingDir)
+                ?.EnumerateFiles()
+                .FirstOrDefault(x => x.Name == filename);
+            if (file == null)
+            {
+                return null;
+            }
+            XDocument doc;
+            using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open))
+            {
+                doc = XDocument.Load(fileStream);
+            }
+            // General info
+            var generalElement = doc.Root.Element("General");
+            var resultElement = generalElement.Element("Result");
+            if (resultElement == null)
+            {
+                resultElement = new XElement("Result");
+                generalElement.Add(resultElement);
+            }
+            resultElement.SetAttributeValue("ManualHandedness", type);
             XmlWriterSettings settings = new XmlWriterSettings() { Indent = true };
             using (FileStream fileStream = new FileStream(file.FullName, FileMode.Truncate))
             {
