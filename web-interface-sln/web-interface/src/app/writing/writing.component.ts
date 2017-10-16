@@ -60,27 +60,30 @@ export class WritingComponent implements OnInit {
   }
 
   changeSelectionType(type: Orientation | 'nohorizontal') {
-    this.activatedRoute.params.combineLatest(this.selected$)
-      .subscribe(([params, selected]) => {
+    const subscription = this.activatedRoute.params.combineLatest(this.selected$)
+      .mergeMap(([params, selected]) => {
         if (Object.keys(selected).length === 0) {
           throw new Error('No selected stroke.');
         }
         const lineIndex = Object.keys(selected)[0];
         // Do the operation
         if (type === 'nohorizontal') {
-          this.writerService.removeHorizontalLine(params.writerId, params.writingId, +lineIndex);
-          this.reloadSubject.next({});
+          return this.writerService.removeHorizontalLine(params.writerId, params.writingId, +lineIndex);
         } else {
-          this.writerService.addHorizontalLine(params.writerId, params.writingId, +lineIndex, type);
-          this.reloadSubject.next({});
+          return this.writerService.addHorizontalLine(params.writerId, params.writingId, +lineIndex, type);
         }
-      }).unsubscribe();
+      }).subscribe(() => {
+        this.reloadSubject.next({});
+        subscription.unsubscribe();
+      });
   }
 
   changeManualHandedness(type: Orientation) {
-    this.activatedRoute.params.subscribe(params => {
-      this.writerService.changeManualHandedness(params.writerId, params.writingId, type);
+    const subscription = this.activatedRoute.params.mergeMap(params => {
+      return this.writerService.changeManualHandedness(params.writerId, params.writingId, type);
+    }).subscribe(x => {
       this.reloadSubject.next({});
-    }).unsubscribe();
+      subscription.unsubscribe();
+    });
   }
 }

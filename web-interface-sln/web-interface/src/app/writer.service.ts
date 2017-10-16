@@ -73,14 +73,18 @@ export class WriterService {
   }
 
   removeHorizontalLine(writerId: string, writingId: string, lineIndex: number) {
-    console.log(`${apiEndpoint}/writers/${writerId}/${writingId}/lines/${lineIndex}`);
+    return this.http.delete(`${apiEndpoint}/writers/${writerId}/${writingId}/lines/${lineIndex}`);
   }
 
   addHorizontalLine(writerId: string, writingId: string, lineIndex: number, type: Orientation) {
-    console.log(`${apiEndpoint}/writers/${writerId}/${writingId}/lines/${lineIndex}`, type);
+    return this.http.put(`${apiEndpoint}/writers/${writerId}/${writingId}/lines/${lineIndex}`, {
+      type
+    });
   }
 
   changeManualHandedness(writerId: string, writingId: string, type: Orientation) {
-    console.log(`${apiEndpoint}/writers/${writerId}/${writingId}`, type);
+    return this.http.put(`${apiEndpoint}/writers/${writerId}/${writingId}`, {
+      manualHandedness: type
+    });
   }
 }
