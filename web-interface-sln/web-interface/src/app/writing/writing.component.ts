@@ -15,6 +15,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
   styleUrls: ['./writing.component.css']
 })
 export class WritingComponent implements OnInit {
+  log$: Observable<string>;
   strokes$: Observable<Stroke[]>;
   text$: Observable<string>;
   writerId$: Observable<string>;
@@ -37,6 +38,7 @@ export class WritingComponent implements OnInit {
     // set data for bindings
     this.writerId$ = writing$.map(x => x.writerId);
     this.text$ = writing$.map(x => x.text);
+    this.log$ = writing$.map(x => x.algorithmLog);
     this.strokes$ = writing$.map(x => x.strokes);
   }
 

@@ -13,6 +13,7 @@ import { WriterService } from './writer.service';
 import { WritingVisualizerComponent } from './writing-visualizer/writing-visualizer.component';
 import { ZoomComponent } from './zoom/zoom.component';
 import { StrokeDataChangerComponent } from './stroke-data-changer/stroke-data-changer.component';
+import { WritingDataChangerComponent } from './writing-data-changer/writing-data-changer.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { StrokeDataChangerComponent } from './stroke-data-changer/stroke-data-ch
     WritingComponent,
     WritingVisualizerComponent,
     ZoomComponent,
-    StrokeDataChangerComponent
+    StrokeDataChangerComponent,
+    WritingDataChangerComponent
   ],
   imports: [
     BrowserModule,
