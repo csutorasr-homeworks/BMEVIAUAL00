@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/pairwise';
 import 'rxjs/add/operator/share';
 
-import { WriterService, Stroke } from '../writer.service';
+import { WriterService, Stroke, Orientation } from '../writer.service';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -50,6 +51,19 @@ export class WritingComponent implements OnInit {
     });
   }
 
-  changeSelectionType() {
+  changeSelectionType(type: Orientation | 'nohorizontal') {
+    this.activatedRoute.params.combineLatest(this.selected$)
+      .subscribe(([params, selected]) => {
+        if (Object.keys(selected).length === 0) {
+          throw new Error('No selected stroke.');
+        }
+        const lineIndex = Object.keys(selected)[0];
+        // Do the operation
+        if (type === 'nohorizontal') {
+          this.writerService.removeHorizontalLine(params.writerId, params.writingId, +lineIndex);
+        } else {
+          this.writerService.addHorizontalLine(params.writerId, params.writingId, +lineIndex, type);
+        }
+      }).unsubscribe();
   }
 }

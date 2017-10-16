@@ -60,4 +60,12 @@ export class WriterService {
       }));
   }
 
+  removeHorizontalLine(writerId: string, writingId: string, lineIndex: number) {
+    console.log(`${apiEndpoint}/writers/${writerId}/${writingId}/lines/${lineIndex}`);
+  }
+
+  addHorizontalLine(writerId: string, writingId: string, lineIndex: number, type: Orientation) {
+    console.log(`${apiEndpoint}/writers/${writerId}/${writingId}/lines/${lineIndex}`, type);
+  }
+
 }
