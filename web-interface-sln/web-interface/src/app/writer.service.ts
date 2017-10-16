@@ -64,6 +64,12 @@ export class WriterService {
   getWriter(writerId: string): Observable<Writer> {
     return this.http.get(`${apiEndpoint}/writers/${writerId}`)
       .map<any, Writer>(res => res.json())
+      .mergeMap(res => {
+        if (this.nextCache[res.name]) {
+          return Observable.of(res);
+        }
+        return this.getList().map(() => res);
+      })
       .map(x => {
         x.writings.forEach((writing, index) => {
           if (index !== x.writings.length - 1) {
