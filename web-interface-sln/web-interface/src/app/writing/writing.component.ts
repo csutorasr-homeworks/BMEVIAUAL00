@@ -38,7 +38,9 @@ export class WritingComponent implements OnInit {
     this.zoom$ = this.zoomSubject.asObservable();
     // load writing
     this.reloadSubject = new BehaviorSubject({});
-    const writing$ = this.activatedRoute.params.combineLatest(this.reloadSubject.asObservable())
+    const writing$ = this.activatedRoute.params
+      .do(() => this.changeSelected())
+      .combineLatest(this.reloadSubject.asObservable())
       .mergeMap(([x]) => this.writerService.getWriting(x.writerId, x.writingId)).share();
     // set data for bindings
     this.writerId$ = writing$.map(x => x.writerId);
@@ -55,7 +57,7 @@ export class WritingComponent implements OnInit {
   }
 
   changeSelected(index?) {
-    if (index) {
+    if (typeof index !== 'undefined') {
       // single select
       this.selectedSubject.next({
         [index]: 'red'
