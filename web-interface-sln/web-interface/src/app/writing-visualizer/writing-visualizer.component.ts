@@ -5,8 +5,15 @@ import 'rxjs/add/observable/combineLatest';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/share';
 
+interface Point {
+  x: number;
+  y: number;
+}
+
 interface DrawableStroke extends Stroke {
   drawablePath: string;
+  startPoint: Point;
+  endPoint: Point;
 }
 
 interface DrawData {
@@ -58,7 +65,9 @@ export class WritingVisualizerComponent implements OnInit {
   convertToDrawableStroke(stroke: Stroke): DrawableStroke {
     const drawableStroke: DrawableStroke = {
       ...stroke,
-      drawablePath: ''
+      drawablePath: '',
+      startPoint: stroke.points[0],
+      endPoint: stroke.points[stroke.points.length - 1]
     };
     let backwards = '';
     if (drawableStroke.points.length > 0) {

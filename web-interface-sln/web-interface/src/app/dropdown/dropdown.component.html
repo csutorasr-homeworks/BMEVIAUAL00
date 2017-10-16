@@ -1,0 +1,7 @@
+<div (click)="toggle()" [title]="tooltip">
+  <button [class.show]="show"></button>
+  <div *ngIf="!show">
+    {{tooltip}}
+  </div>
+</div>
+<ng-content *ngIf="show"></ng-content>

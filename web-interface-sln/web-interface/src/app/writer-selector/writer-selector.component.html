@@ -1,4 +1,7 @@
-<select (change)="changed($event.target.value)">
-  <option [value]="null">Choose!</option>
+<div *ngIf="!(writers$ | async)">
+  Loading...
+</div>
+<select (change)="changed($event.target.value)" *ngIf="writers$ | async">
+  <option [value]="null">Choose a writer!</option>
   <option *ngFor="let writer of (writers$ | async)" [value]="writer">{{writer}}</option>
 </select>

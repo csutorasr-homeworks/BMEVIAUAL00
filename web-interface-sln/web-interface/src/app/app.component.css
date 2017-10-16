@@ -5,3 +5,11 @@
     width: 100%;
     padding: 0.5em;
 }
+
+h1 {
+    transition: 0.5s all;
+}
+
+h1.small {
+    font-size: 1em;
+}

@@ -16,7 +16,7 @@ export class ZoomComponent implements OnInit, OnDestroy {
   constructor() { }
 
   ngOnInit() {
-    this.zoomSubject = new BehaviorSubject(0.1);
+    this.zoomSubject = new BehaviorSubject(0.15);
     this.subscription = this.zoomSubject.subscribe(x => this.zoom$.next(x));
   }
 

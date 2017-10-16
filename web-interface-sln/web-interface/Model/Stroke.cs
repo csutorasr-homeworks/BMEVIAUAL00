@@ -8,5 +8,7 @@ namespace WebInterface.Model
     public class Stroke
     {
         public IEnumerable<Point> Points { get; set; }
+        public bool isHorizontal;
+        public string strokeDirection;
     }
 }

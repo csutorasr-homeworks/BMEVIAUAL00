@@ -1,3 +1,5 @@
-<p>
-  stroke-data-changer works!
-</p>
+<select *ngIf="isSelected$ | async" [formControl]="select" (change)="valueChanged()">
+  <option value="nohorizontal">isn't horizontal (Q)</option>
+  <option value="left">Left (W)</option>
+  <option value="right">Right (E)</option>
+</select>
