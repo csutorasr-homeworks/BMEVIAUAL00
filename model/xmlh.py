@@ -3,44 +3,21 @@ import util
 import copy
 
 
-def remove_outlier_points(file_name):
+def remove_outliers(file_name):
     """
     Finds and removes the outlier points from the stroke in the given file.
     :param file_name: The file that will be scanned for outliers.
     :return:
     """
-    strokes, xml = build_structure(file_name)
-
-    distance_data = []
-
-    # Creating a list that contains the speed of the pen between two points.
-    for index in range(len(strokes)):
-        for point_index in range(len(strokes[index][:-1])):
-            distance_data.append(util.point_2_point(util.Point(strokes[index][point_index][0].x,
-                                                                               strokes[index][point_index][0].y),
-                                                                    util.Point(strokes[index][point_index+1][0].x,
-                                                                               strokes[index][point_index+1][0].y)))
-            # If the delta time is 0 then it is set to 0.01 (the shortest time spam that can be recorded)
-
-    length_data = []
-
-    for stroke in distance_data:
-        for point in stroke:
-            length_data .append(point[0])
-
-    # Finding the quartiles for outlier detection
-    q1, q2, q3 = get_quartiles(length_data)
-
-    length_threshold = q3 + 1.5*(q3-q1)
+    strokes = build_structure(file_name)
 
     tree = ElementTree.parse(file_name)
     root = tree.getroot()
 
-    outliers = get_outlier_points(length_threshold, distance_data)
+    outliers = get_outliers(strokes)
 
     i = 0
     while i < len(outliers):
-        print(str(outliers[i][0]) + " " + str(outliers[i][1]))
         root.find('StrokeSet')[outliers[i][0]].remove(root.find('StrokeSet')[outliers[i][0]][outliers[i][1]])
         for j in range(len(outliers)):
             if outliers[i][0] == outliers[j][0]:
@@ -51,68 +28,107 @@ def remove_outlier_points(file_name):
     tree.write(file_name)
 
 
-def get_quartiles(data):
-    """
-    Finds the first, second and third quartiles for a given data set.
-    :param data: Data that will be analyzed.
-    :return: First, second and third quartiles.
-    """
-    ordered_data = copy.copy(data)
-    ordered_data.sort()
+def get_outliers(data):
 
-    # Separating the odd and the even length cases.
-    if len(ordered_data) % 2 == 1:
-        q2 = ordered_data[int(len(ordered_data) / 2)]
-    else:
-        q2 = (ordered_data[int(len(ordered_data) / 2) - 1] + ordered_data[int(len(ordered_data) / 2)]) / 2
+    stroke_lengths = []
+    for stroke in data:
+        stroke_length = 0
+        for index, point in enumerate(stroke[:-1]):
+            try:
+                stroke_length += util.point_2_point(stroke[index], stroke[index + 1])
+            except IndexError:
+                pass
+        stroke_lengths.append(stroke_length/len(stroke))
 
-    if len(ordered_data[int(len(ordered_data) / 2) + len(ordered_data) % 2:]) % 2 == 1:
-        q1 = ordered_data[int(len(ordered_data) / 2 - 1 - int(len(ordered_data) / 2) / 2)]
-        q3 = ordered_data[int(len(ordered_data) / 2 + int(len(ordered_data) / 2) / 2)]
+    q1, q2, q3 = util.get_quartiles(stroke_lengths)
 
-    else:
-        q1 = (ordered_data[int(len(ordered_data) / 2 - 1 - int(len(ordered_data) / 2) / 2)] +
-              ordered_data[int(len(ordered_data) / 2 - int(len(ordered_data) / 2) / 2)]) / 2
-        q3 = (ordered_data[int(len(ordered_data) / 2 - 1 + len(ordered_data) % 2 + int(len(ordered_data) / 2) / 2)] +
-              ordered_data[int(len(ordered_data) / 2 + len(ordered_data) % 2 + int(len(ordered_data) / 2) / 2)]) / 2
+    length_threshold = q3 + 1.5 * (q3 - q1)
 
-    return q1, q2, q3
+    faulty_strokes = []
+    for stroke_index, stroke in enumerate(data):
+        if stroke_lengths[stroke_index] > length_threshold:
+            faulty_strokes.append(stroke_index)
+
+    lines = get_lines(data, faulty_strokes)
+
+    first_x_pos = util.get_quartiles([line[0][0] for line in lines])[2]
+
+    points = {}
+    for stroke_index in faulty_strokes:
+        points[stroke_index] = get_outlier_points(stroke_index, data[stroke_index], lines, first_x_pos)
+
+    return points
 
 
-def get_text_lines():
-    pass
+def get_lines(data, faulty_strokes):
+    distances = []
+    for stroke_index, stroke in enumerate(data):
+        if stroke_index not in faulty_strokes:
+            median_x = util.get_quartiles([point[0] for point in stroke])[2]
+            if stroke_index < len(data) - 1:
+                next_median_x = util.get_quartiles([point[0] for point in data[stroke_index + 1]])[2]
+                distances.append(util.point_2_point(util.Point(median_x, 0), util.Point(next_median_x, 0)))
+
+    q1, q2, q3 = util.get_quartiles(distances)
+
+    length_threshold = q3 + 1.5 * (q3 - q1)
+
+    # Todo
+
+    lines = []
+    index = 0
+    for stroke_index, stroke in enumerate(data):
+        median_x = util.get_quartiles([point[0] for point in stroke])[2]
+        median_y = util.get_quartiles([point[1] for point in stroke])[2]
+        if stroke_index < len(data) - 1:
+            next_median_x = util.get_quartiles([point[0] for point in data[stroke_index + 1]])[2]
+            if util.point_2_point(util.Point(median_x, 0), util.Point(next_median_x, 0)) > length_threshold:
+                index += 1
+        lines.append((index, median_x, median_y))
+
+    return lines
 
 
-def get_outlier_points(length_threshold, stroke_set):
-    suspects = {}
-    default = 0
-    for i, stroke in enumerate(stroke_set):
-        for j, point_pair in enumerate(stroke):
-            if point_pair[0] > length_threshold:
-                suspects[point_pair[1]] = 1 if suspects.get(point_pair[1], default) == 0 else 2
-                suspects[point_pair[2]] = 1 if suspects.get(point_pair[2], default) == 0 else 2
+def get_outlier_points(index, stroke, line, first_x_pos):
+    points = []
+    for points in stroke:
+        pass
 
-            # Todo
-        for point_pair in [key for key in suspects if key[0] == i]:
-            pass
+    # Todo
 
-        # for point_pair in []
-            # elif j == 1 and suspects.get(point_pair[1], default) != 0:
-            #     suspects[distance_data[i][0][1]] = 2
-            #     suspects[distance_data[i][0][2]] = 2
-            # if j == len(stroke)-1 and suspects.get(point_pair[1], default) != 0\
-            #         and suspects[point_pair[1]] == 1 and suspects.get(point_pair[2], default) != 0 and\
-            #                 suspects[point_pair[2]] == 1:
-            #     print("asd")
-            #     suspects[point_pair[1]] = 2
-            #     suspects[point_pair[2]] = 2
+    return points
 
-    outliers = []
-    for key, value in suspects.items():
-        if value == 2:
-            outliers.append(key)
 
-    return outliers
+# def get_outlier_points(length_threshold, stroke_set):
+#     suspects = {}
+#     default = 0
+#     for i, stroke in enumerate(stroke_set):
+#         for j, point_pair in enumerate(stroke):
+#             if point_pair[0] > length_threshold:
+#                 suspects[point_pair[1]] = 1 if suspects.get(point_pair[1], default) == 0 else 2
+#                 suspects[point_pair[2]] = 1 if suspects.get(point_pair[2], default) == 0 else 2
+#
+#             # Todo
+#         for point_pair in [key for key in suspects if key[0] == i]:
+#             pass
+#
+#         # for point_pair in []
+#             # elif j == 1 and suspects.get(point_pair[1], default) != 0:
+#             #     suspects[distance_data[i][0][1]] = 2
+#             #     suspects[distance_data[i][0][2]] = 2
+#             # if j == len(stroke)-1 and suspects.get(point_pair[1], default) != 0\
+#             #         and suspects[point_pair[1]] == 1 and suspects.get(point_pair[2], default) != 0 and\
+#             #                 suspects[point_pair[2]] == 1:
+#             #     print("asd")
+#             #     suspects[point_pair[1]] = 2
+#             #     suspects[point_pair[2]] = 2
+#
+#     outliers = []
+#     for key, value in suspects.items():
+#         if value == 2:
+#             outliers.append(key)
+#
+#     return outliers
 
 
 def mark_horizontal(file_name, indexes):
@@ -145,10 +161,7 @@ def build_structure(file_name):
         tree = ElementTree.parse(file)
         root = tree.getroot()
 
-        # text_lines = [text_line.attrib['text'] for text_line in root[1][1:]]
-
         strokes = []
-        xml = []
         # StrokeSet tag stores the strokes in the xml
         for index in range(len(root.find('StrokeSet'))):
             strokes.append([(util.Point(float(point.attrib['x']), float(point.attrib['y'])),

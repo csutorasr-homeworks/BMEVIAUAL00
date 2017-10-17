@@ -1,4 +1,5 @@
 import math
+import copy
 
 
 class Point:
@@ -60,3 +61,30 @@ def calculate_angle(point_a, point_b):
     vector = Point(point_b.x - point_a.x, point_b.y - point_a.y)
     n_vector = Point(vector.x / vector.length, vector.y / vector.length)
     return math.degrees(math.acos(n_vector.x))
+
+
+def get_quartiles(data):
+    """
+    Finds the first, second and third quartiles for a given data set.
+    :param data: Data that will be analyzed.
+    :return: First, second and third quartiles.
+    """
+    ordered_data = copy.copy(data)
+    ordered_data.sort()
+
+    # Separating the odd and the even length cases.
+    if len(ordered_data) % 2 == 1:
+        q2 = ordered_data[int(len(ordered_data) / 2)]
+    else:
+        q2 = (ordered_data[int(len(ordered_data) / 2) - 1] + ordered_data[int(len(ordered_data) / 2)]) / 2
+
+    if len(ordered_data[int(len(ordered_data) / 2) + len(ordered_data) % 2:]) % 2 == 1:
+        q1 = ordered_data[int(len(ordered_data) / 2 - 1 - int(len(ordered_data) / 2) / 2)]
+        q3 = ordered_data[int(len(ordered_data) / 2 + int(len(ordered_data) / 2) / 2)]
+    else:
+        q1 = (ordered_data[int(len(ordered_data) / 2 - 1 - int(len(ordered_data) / 2) / 2)] +
+              ordered_data[int(len(ordered_data) / 2 - int(len(ordered_data) / 2) / 2)]) / 2
+        q3 = (ordered_data[int(len(ordered_data) / 2 - 1 + len(ordered_data) % 2 + int(len(ordered_data) / 2) / 2)] +
+              ordered_data[int(len(ordered_data) / 2 + len(ordered_data) % 2 + int(len(ordered_data) / 2) / 2)]) / 2
+
+    return q1, q2, q3
