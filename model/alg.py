@@ -29,7 +29,7 @@ class Algorithm:
         :return:
         """
         try:
-            self.strokes = xmlh.build_structure(file_name, False)
+            self.strokes = xmlh.build_structure(file_name)
 
         except IOError as e:
             print('I/O error({0}): {1}.'.format(e.errno, e.strerror))

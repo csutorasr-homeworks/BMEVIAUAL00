@@ -9,20 +9,17 @@ def remove_outlier_points(file_name):
     :param file_name: The file that will be scanned for outliers.
     :return:
     """
-    strokes, xml = build_structure(file_name, get_xml=True)
+    strokes, xml = build_structure(file_name)
 
     distance_data = []
 
     # Creating a list that contains the speed of the pen between two points.
     for index in range(len(strokes)):
-        distance_data.append([])
         for point_index in range(len(strokes[index][:-1])):
-            distance_data[index].append((util.point_2_point(util.Point(strokes[index][point_index][0].x,
+            distance_data.append(util.point_2_point(util.Point(strokes[index][point_index][0].x,
                                                                                strokes[index][point_index][0].y),
                                                                     util.Point(strokes[index][point_index+1][0].x,
-                                                                               strokes[index][point_index+1][0].y)),
-                                        (index, point_index),
-                                        (index, point_index+1)))
+                                                                               strokes[index][point_index+1][0].y)))
             # If the delta time is 0 then it is set to 0.01 (the shortest time spam that can be recorded)
 
     length_data = []
@@ -82,16 +79,24 @@ def get_quartiles(data):
     return q1, q2, q3
 
 
-def get_outlier_points(length_threshold, distance_data):
+def get_text_lines():
+    pass
+
+
+def get_outlier_points(length_threshold, stroke_set):
     suspects = {}
     default = 0
-    for i, stroke in enumerate(distance_data):
+    for i, stroke in enumerate(stroke_set):
         for j, point_pair in enumerate(stroke):
             if point_pair[0] > length_threshold:
                 suspects[point_pair[1]] = 1 if suspects.get(point_pair[1], default) == 0 else 2
                 suspects[point_pair[2]] = 1 if suspects.get(point_pair[2], default) == 0 else 2
 
             # Todo
+        for point_pair in [key for key in suspects if key[0] == i]:
+            pass
+
+        # for point_pair in []
             # elif j == 1 and suspects.get(point_pair[1], default) != 0:
             #     suspects[distance_data[i][0][1]] = 2
             #     suspects[distance_data[i][0][2]] = 2
@@ -130,11 +135,10 @@ def mark_horizontal(file_name, indexes):
     tree.write(file_name)
 
 
-def build_structure(file_name, get_xml):
+def build_structure(file_name):
     """
     Creates a multi layer list structure of the given xml.
     :param file_name: Name of the XML.
-    :param get_xml: Boolean value determining, whether the xml object structure is required.
     :return: The structured list of the XML.
     """
     with open(file_name, 'r') as file:
@@ -149,17 +153,14 @@ def build_structure(file_name, get_xml):
         for index in range(len(root.find('StrokeSet'))):
             strokes.append([(util.Point(float(point.attrib['x']), float(point.attrib['y'])),
                              float(point.attrib['time'])) for point in root.find('StrokeSet')[index][:]])
-            xml.append([point for point in root.find('StrokeSet')[index]])
 
-    if get_xml:
-        return strokes, xml
-    else:
         return strokes
 
 
 def main():
     # remove_outlier_points('/home/patrik/Desktop/TestStrokes/corrected/d10-718.xml')
     pass
+
 
 if __name__ == "__main__":
     main()
