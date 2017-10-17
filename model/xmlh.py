@@ -4,7 +4,6 @@ import copy
 
 
 def remove_outlier_points(file_name):
-    # Todo
     """
     Finds and removes the outlier points from the stroke in the given file.
     :param file_name: The file that will be scanned for outliers.
@@ -84,21 +83,24 @@ def get_quartiles(data):
 
 
 def get_outlier_points(length_threshold, distance_data):
-    # Todo
     suspects = {}
     default = 0
     for i, stroke in enumerate(distance_data):
-        for j, point_distance in enumerate(stroke):
-            if point_distance[0] > length_threshold:
-                suspects[point_distance[1]] = 1 if suspects.get(point_distance[1], default) == 0 else 2
-                suspects[point_distance[2]] = 1 if suspects.get(point_distance[2], default) == 0 else 2
-            elif j == 1 and suspects.get(point_distance[1], default) != 0:
-                suspects[distance_data[i][0][1]] = 2
-            if j == len(stroke)-1 and suspects.get(point_distance[1], default) != 0\
-                    and suspects[point_distance[1]] == 1 and suspects.get(point_distance[2], default) != 0 and\
-                            suspects[point_distance[2]] == 1:
-                suspects[point_distance[1]] = 2
-                suspects[point_distance[2]] = 2
+        for j, point_pair in enumerate(stroke):
+            if point_pair[0] > length_threshold:
+                suspects[point_pair[1]] = 1 if suspects.get(point_pair[1], default) == 0 else 2
+                suspects[point_pair[2]] = 1 if suspects.get(point_pair[2], default) == 0 else 2
+
+            # Todo
+            # elif j == 1 and suspects.get(point_pair[1], default) != 0:
+            #     suspects[distance_data[i][0][1]] = 2
+            #     suspects[distance_data[i][0][2]] = 2
+            # if j == len(stroke)-1 and suspects.get(point_pair[1], default) != 0\
+            #         and suspects[point_pair[1]] == 1 and suspects.get(point_pair[2], default) != 0 and\
+            #                 suspects[point_pair[2]] == 1:
+            #     print("asd")
+            #     suspects[point_pair[1]] = 2
+            #     suspects[point_pair[2]] = 2
 
     outliers = []
     for key, value in suspects.items():
@@ -156,8 +158,8 @@ def build_structure(file_name, get_xml):
 
 
 def main():
-    remove_outlier_points('/home/patrik/Desktop/TestStrokes/corrected/d10-718.xml')
-
+    # remove_outlier_points('/home/patrik/Desktop/TestStrokes/corrected/d10-718.xml')
+    pass
 
 if __name__ == "__main__":
     main()
