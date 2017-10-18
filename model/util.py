@@ -101,6 +101,19 @@ def get_set_distance(data):
     return distances
 
 
+def find_all(data, value):
+    indexes = []
+    for index, element in enumerate(data):
+        if element == value:
+            indexes.append(index)
+
+    return indexes
+
+
+def dfs():
+    pass
+
+
 def get_quartiles(data):
     """
     Finds the first, second and third quartiles for a given data set.
