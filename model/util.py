@@ -50,6 +50,19 @@ def point_2_line(point_a, point_b, point):
         (point_b.x - point_a.x) ** 2 + (point_b.y - point_a.y) ** 2)
 
 
+def point_2_set(point, points):
+    """
+    Distance between a point and a set of points.
+    :param point: A single point
+    :param points: A set of points.
+    :return: Distance
+    """
+    distances = []
+    for element in points:
+        distances.append(point_2_point(point, element))
+    return min(distances)
+
+
 def calculate_angle(point_a, point_b):
     """
     Calculates the included angle (degrees) of a vector and horizontal line.
@@ -88,3 +101,4 @@ def get_quartiles(data):
               ordered_data[int(len(ordered_data) / 2 + len(ordered_data) % 2 + int(len(ordered_data) / 2) / 2)]) / 2
 
     return q1, q2, q3
+

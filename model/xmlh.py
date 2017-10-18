@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ElementTree
 import util
-import copy
 
 
 def remove_outliers(file_name):
@@ -55,15 +54,19 @@ def get_outliers(data):
 
     points = {}
     for stroke_index in faulty_strokes:
-        points[stroke_index] = get_outlier_points(stroke_index, data[stroke_index], lines, first_x_pos)
+        points[stroke_index] = get_outlier_points(stroke_index,
+                                                  data[stroke_index],
+                                                  [line_element for line_element in lines if
+                                                   line_element[0] == lines[stroke_index][0]], first_x_pos)
 
     return points
 
 
 def get_lines(data, faulty_strokes):
     distances = []
-    for stroke_index, stroke in enumerate(data):
-        if stroke_index not in faulty_strokes:
+
+    correct_strokes = [stroke for stroke_index, stroke in enumerate(data) if stroke_index not in faulty_strokes]
+    for stroke_index, stroke in enumerate(correct_strokes):
             median_x = util.get_quartiles([point[0] for point in stroke])[2]
             if stroke_index < len(data) - 1:
                 next_median_x = util.get_quartiles([point[0] for point in data[stroke_index + 1]])[2]
@@ -73,11 +76,9 @@ def get_lines(data, faulty_strokes):
 
     length_threshold = q3 + 1.5 * (q3 - q1)
 
-    # Todo
-
     lines = []
     index = 0
-    for stroke_index, stroke in enumerate(data):
+    for stroke_index, stroke in enumerate(correct_strokes):
         median_x = util.get_quartiles([point[0] for point in stroke])[2]
         median_y = util.get_quartiles([point[1] for point in stroke])[2]
         if stroke_index < len(data) - 1:
@@ -86,7 +87,25 @@ def get_lines(data, faulty_strokes):
                 index += 1
         lines.append((index, median_x, median_y))
 
+    for stroke_index in faulty_strokes:
+        lines.insert(stroke_index, (-1, -1, -1))
+
+    for stroke_index in faulty_strokes:
+        lines[stroke_index] = predict_stroke_position(stroke_index, lines, data)
+
     return lines
+
+
+def predict_stroke_position(stroke_index, lines, strokes):
+    if len(strokes)-1 > stroke_index > 0:
+        if lines[stroke_index-1][0] == lines[stroke_index+1][0]:
+            line_index = lines[stroke_index-1][0]
+        else:
+            # Todo
+            # line_index = lines[stroke_index-1][0] if util.point_2_set()
+            pass
+
+    return -1, -1, -1
 
 
 def get_outlier_points(index, stroke, line, first_x_pos):
@@ -108,7 +127,6 @@ def get_outlier_points(index, stroke, line, first_x_pos):
 #                 suspects[point_pair[1]] = 1 if suspects.get(point_pair[1], default) == 0 else 2
 #                 suspects[point_pair[2]] = 1 if suspects.get(point_pair[2], default) == 0 else 2
 #
-#             # Todo
 #         for point_pair in [key for key in suspects if key[0] == i]:
 #             pass
 #
