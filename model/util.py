@@ -12,6 +12,12 @@ class Point:
         self.y = y
         self.length = math.sqrt(x**2 + y**2)
 
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __radd__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
 
 class Stroke:
     """

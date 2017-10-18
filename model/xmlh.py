@@ -55,10 +55,8 @@ def get_outliers(data):
 
     points = {}
     for stroke_index in faulty_strokes:
-        points[stroke_index] = get_outlier_points(stroke_index,
-                                                  data[stroke_index],
-                                                  [line_element for line_element in lines if
-                                                   line_element[0] == lines[stroke_index][0]],
+        points[stroke_index] = get_outlier_points(data[stroke_index],
+                                                  lines[stroke_index],
                                                   point_length_limit)
 
     return points
@@ -139,7 +137,7 @@ def predict_stroke_position(stroke_index, lines, strokes):
     return line_index, median_x, median_y
 
 
-def get_outlier_points(index, stroke, line, limit):
+def get_outlier_points(stroke, estimated_position, limit):
     points = []
 
     adjacency_matrix = np.ones((len(stroke), len(stroke)))
@@ -151,14 +149,39 @@ def get_outlier_points(index, stroke, line, limit):
                 adjacency_matrix[row][col] = 0
 
     adjacency_list = []
-
     for row in adjacency_matrix:
         adjacency_list.append(util.find_all(row, 1))
 
     groups = []
     while len(adjacency_list) > 0:
+        group = util.dfs()
+        groups.append(group)
+        for index, points in enumerate(adjacency_list[::-1]):
+            if index in adjacency_list:
+                del adjacency_list[index]
 
-        groups.append(util.bfs())
+    average_positions = []
+    for group in groups:
+        if len(group) == 0:
+            average_positions.append(get_points_from_index(group, stroke))
+        else:
+            average_positions.append(util.get_average(get_points_from_index(group, stroke)))
+
+    for position in average_positions:
+        util.point_2_point(position, )
+
+
+    return points
+
+
+def get_points_from_index(indexes, stroke):
+    points = []
+    for index, point in enumerate(stroke):
+        if type(indexes) is int:
+            if index == indexes:
+                points.append(point)
+        elif index in indexes:
+            points.append(point)
 
     return points
 
@@ -172,37 +195,6 @@ def get_point_distance_limit(strokes):
     q1, q2, q3 = get_outliers(distances)
 
     return q3 + 1.5 * (q3 - q1)
-
-
-# def get_outlier_points(length_threshold, stroke_set):
-#     suspects = {}
-#     default = 0
-#     for i, stroke in enumerate(stroke_set):
-#         for j, point_pair in enumerate(stroke):
-#             if point_pair[0] > length_threshold:
-#                 suspects[point_pair[1]] = 1 if suspects.get(point_pair[1], default) == 0 else 2
-#                 suspects[point_pair[2]] = 1 if suspects.get(point_pair[2], default) == 0 else 2
-#
-#         for point_pair in [key for key in suspects if key[0] == i]:
-#             pass
-#
-#         # for point_pair in []
-#             # elif j == 1 and suspects.get(point_pair[1], default) != 0:
-#             #     suspects[distance_data[i][0][1]] = 2
-#             #     suspects[distance_data[i][0][2]] = 2
-#             # if j == len(stroke)-1 and suspects.get(point_pair[1], default) != 0\
-#             #         and suspects[point_pair[1]] == 1 and suspects.get(point_pair[2], default) != 0 and\
-#             #                 suspects[point_pair[2]] == 1:
-#             #     print("asd")
-#             #     suspects[point_pair[1]] = 2
-#             #     suspects[point_pair[2]] = 2
-#
-#     outliers = []
-#     for key, value in suspects.items():
-#         if value == 2:
-#             outliers.append(key)
-#
-#     return outliers
 
 
 def mark_horizontal(file_name, indexes):
