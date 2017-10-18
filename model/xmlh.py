@@ -137,12 +137,23 @@ def predict_stroke_position(stroke_index, lines, strokes):
 
 def get_outlier_points(index, stroke, line):
     points = []
-    for points in stroke:
-        pass
+
+
 
 
 
     return points
+
+
+def get_point_distance_threshold(strokes):
+    distances = []
+    for stroke in strokes:
+        for distance in util.get_set_distance(stroke):
+            distances.append(distance)
+
+    q1, q2, q3 = get_outliers(distances)
+
+    return q3 + 1.5 * (q3 - q1)
 
 
 # def get_outlier_points(length_threshold, stroke_set):

@@ -82,7 +82,23 @@ def get_average(data):
     :param data: Provided data.
     :return: Average.
     """
-    return sum(data)/len(data)
+    return sum(copy.copy(data))/len(data)
+
+
+def get_set_distance(data):
+    """
+    Calculates the distance between every single point of a given data set.
+    :param data: Provided data.
+    :return: List of distances.
+    """
+    distances = []
+    for i in range(len(data[:-1])):
+        j = i+1
+        while j < len(data):
+            distances.append(point_2_point(data[i], data[j]))
+            j += 1
+
+    return distances
 
 
 def get_quartiles(data):
