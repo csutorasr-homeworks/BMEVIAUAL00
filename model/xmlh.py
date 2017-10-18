@@ -95,6 +95,8 @@ def get_lines(data, faulty_strokes):
 
 
 def predict_stroke_position(stroke_index, lines, strokes):
+
+    distances = []
     if len(strokes)-1 > stroke_index > 0:
         if lines[stroke_index-1][0] == lines[stroke_index+1][0]:
             line_index = lines[stroke_index-1][0]
@@ -104,20 +106,31 @@ def predict_stroke_position(stroke_index, lines, strokes):
                                                                          strokes[stroke_index])) else\
                 lines[stroke_index + 1][0]
 
+        x_medians = [stroke[1] for stroke in lines if stroke[0] == line_index]
+        for index, x_median in enumerate(x_medians[:-1]):
+            distances.append(util.point_2_point(util.Point(x_median, 0), util.Point(x_medians[index + 1], 0)))
+
         if line_index == lines[stroke_index-1][0]:
-            distances = []
-            x_medians = [stroke[1] for stroke in lines if stroke[0] == line_index]
-            for index, x_median in enumerate(x_medians[:-1]):
-                distances.append(util.point_2_point(util.Point(x_median, 0), util.Point(x_medians[index+1], 0)))
             median_x = lines[stroke_index-1][1] + util.get_average(distances)
         else:
+            median_x = lines[stroke_index+1][1] - util.get_average(distances)
 
-            median_x = 0
-            # util.get_quartiles([stroke[0] for stroke in lines[::len([element for element in lines if element[0] == stroke[0]])] if stroke[0] == 0])
+    elif stroke_index == 0:
+        line_index = lines[stroke_index + 1][0]
+        x_medians = [stroke[1] for stroke in lines if stroke[0] == line_index]
+        for index, x_median in enumerate(x_medians[:-1]):
+            distances.append(util.point_2_point(util.Point(x_median, 0), util.Point(x_medians[index + 1], 0)))
 
-    median_x = 0
-    median_y = 0
-    line_index = 0
+        median_x = lines[stroke_index+1][1] - util.get_average(distances)
+
+    else:
+        line_index = lines[stroke_index - 1][0]
+        x_medians = [stroke[1] for stroke in lines if stroke[0] == line_index]
+        for index, x_median in enumerate(x_medians[:-1]):
+            distances.append(util.point_2_point(util.Point(x_median, 0), util.Point(x_medians[index + 1], 0)))
+        median_x = lines[stroke_index-1][1] + util.get_average(distances)
+
+    median_y = util.get_average([stroke[2] for stroke in lines if stroke[0] == line_index])
 
     return line_index, median_x, median_y
 
@@ -127,7 +140,7 @@ def get_outlier_points(index, stroke, line):
     for points in stroke:
         pass
 
-    # Todo
+
 
     return points
 
