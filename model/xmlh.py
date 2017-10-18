@@ -50,14 +50,12 @@ def get_outliers(data):
 
     lines = get_lines(data, faulty_strokes)
 
-    first_x_pos = util.get_quartiles([line[0][0] for line in lines])[2]
-
     points = {}
     for stroke_index in faulty_strokes:
         points[stroke_index] = get_outlier_points(stroke_index,
                                                   data[stroke_index],
                                                   [line_element for line_element in lines if
-                                                   line_element[0] == lines[stroke_index][0]], first_x_pos)
+                                                   line_element[0] == lines[stroke_index][0]])
 
     return points
 
@@ -101,14 +99,30 @@ def predict_stroke_position(stroke_index, lines, strokes):
         if lines[stroke_index-1][0] == lines[stroke_index+1][0]:
             line_index = lines[stroke_index-1][0]
         else:
-            # Todo
-            # line_index = lines[stroke_index-1][0] if util.point_2_set()
-            pass
+            line_index = lines[stroke_index-1][0] if (util.point_2_set(lines[stroke_index-1][1], strokes[stroke_index])
+                                                      < util.point_2_set(lines[stroke_index+1][1],
+                                                                         strokes[stroke_index])) else\
+                lines[stroke_index + 1][0]
 
-    return -1, -1, -1
+        if line_index == lines[stroke_index-1][0]:
+            distances = []
+            x_medians = [stroke[1] for stroke in lines if stroke[0] == line_index]
+            for index, x_median in enumerate(x_medians[:-1]):
+                distances.append(util.point_2_point(util.Point(x_median, 0), util.Point(x_medians[index+1], 0)))
+            median_x = lines[stroke_index-1][1] + util.get_average(distances)
+        else:
+
+            median_x = 0
+            # util.get_quartiles([stroke[0] for stroke in lines[::len([element for element in lines if element[0] == stroke[0]])] if stroke[0] == 0])
+
+    median_x = 0
+    median_y = 0
+    line_index = 0
+
+    return line_index, median_x, median_y
 
 
-def get_outlier_points(index, stroke, line, first_x_pos):
+def get_outlier_points(index, stroke, line):
     points = []
     for points in stroke:
         pass
@@ -182,8 +196,8 @@ def build_structure(file_name):
         strokes = []
         # StrokeSet tag stores the strokes in the xml
         for index in range(len(root.find('StrokeSet'))):
-            strokes.append([(util.Point(float(point.attrib['x']), float(point.attrib['y'])),
-                             float(point.attrib['time'])) for point in root.find('StrokeSet')[index][:]])
+            strokes.append([(util.Point(float(point.attrib['x']), float(point.attrib['y'])))
+                            for point in root.find('StrokeSet')[index][:]])
 
         return strokes
 

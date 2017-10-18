@@ -76,6 +76,15 @@ def calculate_angle(point_a, point_b):
     return math.degrees(math.acos(n_vector.x))
 
 
+def get_average(data):
+    """
+    Calculates the average of a given data set.
+    :param data: Provided data.
+    :return: Average.
+    """
+    return sum(data)/len(data)
+
+
 def get_quartiles(data):
     """
     Finds the first, second and third quartiles for a given data set.
