@@ -135,8 +135,11 @@ def _dfs(index, adjacency_list, grouped_points):
 
     for vertex in adjacency_list[index]:
         if vertex not in grouped_points:
+            index = vertex
+            grouped_points.add(vertex)
+            _dfs(index, adjacency_list, grouped_points)
 
-    return set()
+    return grouped_points
 
 
 def get_quartiles(data):

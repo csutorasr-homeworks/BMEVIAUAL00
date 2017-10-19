@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ElementTree
 import util
 import numpy as np
+import copy
 from collections import OrderedDict
 
 
@@ -15,7 +16,9 @@ def remove_outliers(file_name):
     tree = ElementTree.parse(file_name)
     root = tree.getroot()
 
-    for stroke_index, stroke in reversed(get_outliers(strokes).items()):
+    outliers = reversed(get_outliers(strokes).items())
+
+    for stroke_index, stroke in outliers:
         for point_index in reversed(stroke):
             root.find('StrokeSet')[stroke_index].remove(root.find('StrokeSet')[stroke_index][point_index])
 
@@ -53,7 +56,7 @@ def get_outliers(data):
                                                   lines[stroke_index],
                                                   point_length_limit)
 
-    return points
+    return OrderedDict()
 
 
 def get_lines(data, faulty_strokes):
@@ -61,9 +64,9 @@ def get_lines(data, faulty_strokes):
 
     correct_strokes = [stroke for stroke_index, stroke in enumerate(data) if stroke_index not in faulty_strokes]
     for stroke_index, stroke in enumerate(correct_strokes):
-            median_x = util.get_quartiles([point[0] for point in stroke])[2]
+            median_x = util.get_quartiles([point.x for point in stroke])[2]
             if stroke_index < len(data) - 1:
-                next_median_x = util.get_quartiles([point[0] for point in data[stroke_index + 1]])[2]
+                next_median_x = util.get_quartiles([point.x for point in data[stroke_index + 1]])[2]
                 distances.append(util.point_2_point(util.Point(median_x, 0), util.Point(next_median_x, 0)))
 
     q1, q2, q3 = util.get_quartiles(distances)
@@ -73,10 +76,10 @@ def get_lines(data, faulty_strokes):
     lines = []
     index = 0
     for stroke_index, stroke in enumerate(correct_strokes):
-        median_x = util.get_quartiles([point[0] for point in stroke])[2]
-        median_y = util.get_quartiles([point[1] for point in stroke])[2]
+        median_x = util.get_quartiles([point.x for point in stroke])[2]
+        median_y = util.get_quartiles([point.y for point in stroke])[2]
         if stroke_index < len(data) - 1:
-            next_median_x = util.get_quartiles([point[0] for point in data[stroke_index + 1]])[2]
+            next_median_x = util.get_quartiles([point.x for point in data[stroke_index + 1]])[2]
             if util.point_2_point(util.Point(median_x, 0), util.Point(next_median_x, 0)) > length_limit:
                 index += 1
         lines.append((index, median_x, median_y))
@@ -97,10 +100,13 @@ def predict_stroke_position(stroke_index, lines, strokes):
         if lines[stroke_index-1][0] == lines[stroke_index+1][0]:
             line_index = lines[stroke_index-1][0]
         else:
-            line_index = lines[stroke_index-1][0] if (util.point_2_set(lines[stroke_index-1][1], strokes[stroke_index])
-                                                      < util.point_2_set(lines[stroke_index+1][1],
-                                                                         strokes[stroke_index])) else\
-                lines[stroke_index + 1][0]
+            prev_median_y = util.get_average([stroke[2] for stroke in lines if stroke[0] == lines[stroke_index-1][0]])
+            next_median_y = util.get_average([stroke[2] for stroke in lines if stroke[0] == lines[stroke_index+1][0]])
+            line_index = lines[stroke_index-1][0] if\
+                util.point_2_set(util.Point(lines[stroke_index-1][1], prev_median_y),
+                                 strokes[stroke_index]) <\
+                util.point_2_set(util.Point(lines[stroke_index+1][1], next_median_y),
+                                 strokes[stroke_index]) else lines[stroke_index + 1][0]
 
         x_medians = [stroke[1] for stroke in lines if stroke[0] == line_index]
         for index, x_median in enumerate(x_medians[:-1]):
@@ -134,8 +140,8 @@ def predict_stroke_position(stroke_index, lines, strokes):
 def get_outlier_points(stroke, estimated_position, limit):
 
     adjacency_matrix = np.ones((len(stroke), len(stroke)))
-    for row in adjacency_matrix:
-        for col in adjacency_matrix[row]:
+    for row in range(len(adjacency_matrix)):
+        for col in range(len(adjacency_matrix[row])):
             if row == col:
                 adjacency_matrix[row][col] = -1
             elif util.point_2_point(stroke[row], stroke[col]) > limit:
@@ -147,7 +153,7 @@ def get_outlier_points(stroke, estimated_position, limit):
 
     groups = []
     while len(adjacency_list) > 0:
-        group = util.dfs()
+        group = util.dfs(adjacency_list)
         groups.append(group)
         for index, points in enumerate(adjacency_list[::-1]):
             if index in adjacency_list:
@@ -187,13 +193,15 @@ def get_points_from_index(indexes, stroke):
     return points
 
 
-def get_point_distance_limit(strokes):
+def get_point_distance_limit(data):
+
+    strokes = copy.copy(data)
     distances = []
     for stroke_index, stroke in enumerate(strokes):
         for point_index, point in enumerate(stroke[:-1]):
             distances.append(util.point_2_point(stroke[point_index], stroke[point_index+1]))
 
-    q1, q2, q3 = get_outliers(distances)
+    q1, q2, q3 = util.get_quartiles(distances)
 
     return q3 + 1.5 * (q3 - q1)
 
@@ -238,7 +246,7 @@ def build_structure(file_name):
 
 
 def main():
-    # remove_outliers('/home/patrik/Desktop/TestStrokes/corrected/d10-718.xml')
+    remove_outliers('/home/patrik/Desktop/TestStrokes/corrected/d10-718.xml')
     pass
 
 
