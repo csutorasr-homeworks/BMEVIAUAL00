@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ElementTree
 import util
 import numpy as np
+from collections import OrderedDict
 
 
 def remove_outliers(file_name):
@@ -14,16 +15,9 @@ def remove_outliers(file_name):
     tree = ElementTree.parse(file_name)
     root = tree.getroot()
 
-    outliers = get_outliers(strokes)
-
-    i = 0
-    while i < len(outliers):
-        root.find('StrokeSet')[outliers[i][0]].remove(root.find('StrokeSet')[outliers[i][0]][outliers[i][1]])
-        for j in range(len(outliers)):
-            if outliers[i][0] == outliers[j][0]:
-                outliers[j] = (outliers[j][0], outliers[j][1]-1)
-        del outliers[i]
-        i += 1
+    for stroke_index, stroke in reversed(get_outliers(strokes).items()):
+        for point_index in reversed(stroke):
+            root.find('StrokeSet')[stroke_index].remove(root.find('StrokeSet')[stroke_index][point_index])
 
     tree.write(file_name)
 
@@ -53,7 +47,7 @@ def get_outliers(data):
 
     point_length_limit = get_point_distance_limit(data)
 
-    points = {}
+    points = OrderedDict()
     for stroke_index in faulty_strokes:
         points[stroke_index] = get_outlier_points(data[stroke_index],
                                                   lines[stroke_index],
@@ -138,7 +132,6 @@ def predict_stroke_position(stroke_index, lines, strokes):
 
 
 def get_outlier_points(stroke, estimated_position, limit):
-    points = []
 
     adjacency_matrix = np.ones((len(stroke), len(stroke)))
     for row in adjacency_matrix:
@@ -167,9 +160,17 @@ def get_outlier_points(stroke, estimated_position, limit):
         else:
             average_positions.append(util.get_average(get_points_from_index(group, stroke)))
 
+    distances = []
     for position in average_positions:
-        util.point_2_point(position, )
+        distances.append(util.point_2_point(position, estimated_position))
 
+    closest_group = distances.index(min(distances))
+
+    points = [point for index, point in enumerate(stroke) if index not in groups[closest_group]]
+
+    points.append(closest_group)
+
+    points.sort()
 
     return points
 
@@ -237,7 +238,7 @@ def build_structure(file_name):
 
 
 def main():
-    # remove_outlier_points('/home/patrik/Desktop/TestStrokes/corrected/d10-718.xml')
+    # remove_outliers('/home/patrik/Desktop/TestStrokes/corrected/d10-718.xml')
     pass
 
 

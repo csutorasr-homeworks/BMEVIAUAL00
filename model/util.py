@@ -108,6 +108,12 @@ def get_set_distance(data):
 
 
 def find_all(data, value):
+    """
+
+    :param data:
+    :param value:
+    :return:
+    """
     indexes = []
     for index, element in enumerate(data):
         if element == value:
@@ -116,8 +122,21 @@ def find_all(data, value):
     return indexes
 
 
-def dfs():
-    pass
+def dfs(adjacency_list):
+    grouped_points = set()
+    grouped_points.add(0)
+
+    grouped_points = grouped_points | _dfs(0, adjacency_list, grouped_points)
+
+    return grouped_points
+
+
+def _dfs(index, adjacency_list, grouped_points):
+
+    for vertex in adjacency_list[index]:
+        if vertex not in grouped_points:
+
+    return set()
 
 
 def get_quartiles(data):
