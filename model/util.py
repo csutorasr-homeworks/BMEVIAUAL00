@@ -92,6 +92,11 @@ def get_average(data):
 
 
 def get_average_point(data):
+    """
+
+    :param data:
+    :return:
+    """
     x = sum([point.x for point in data])/len(data)
     y = sum([point.y for point in data])/len(data)
     return Point(x, y)
@@ -105,7 +110,7 @@ def get_set_distance(data):
     """
     distances = []
     for i in range(len(data[:-1])):
-        j = i+1
+        j = i + 1
         while j < len(data):
             distances.append(point_2_point(data[i], data[j]))
             j += 1
@@ -129,11 +134,13 @@ def find_all(data, value):
 
 
 def dfs(adjacency_list):
+    """
 
+    :param adjacency_list:
+    :return:
+    """
     grouped_points = set()
-
     start, vertices = adjacency_list.popitem()
-
     grouped_points.add(start)
 
     for vertex in vertices:
@@ -145,7 +152,13 @@ def dfs(adjacency_list):
 
 
 def _dfs(index, adjacency_list, grouped_points):
+    """
 
+    :param index:
+    :param adjacency_list:
+    :param grouped_points:
+    :return:
+    """
     for vertex in adjacency_list[index]:
         if vertex not in grouped_points:
             grouped_points.add(vertex)
