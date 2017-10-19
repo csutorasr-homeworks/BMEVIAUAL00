@@ -16,9 +16,7 @@ def remove_outliers(file_name):
     tree = ElementTree.parse(file_name)
     root = tree.getroot()
 
-    outliers = reversed(get_outliers(strokes).items())
-
-    for stroke_index, stroke in outliers:
+    for stroke_index, stroke in reversed(get_outliers(strokes).items()):
         for point_index in reversed(stroke):
             root.find('StrokeSet')[stroke_index].remove(root.find('StrokeSet')[stroke_index][point_index])
 
@@ -56,11 +54,11 @@ def get_outliers(data):
                                                   lines[stroke_index],
                                                   point_length_limit)
 
-    return OrderedDict()
+    return points
 
 
 def get_lines(data, faulty_strokes):
-    print("get_lines")
+
     distances = []
     correct_strokes = [stroke for stroke_index, stroke in enumerate(data) if stroke_index not in faulty_strokes]
     for stroke_index, stroke in enumerate(correct_strokes):
@@ -94,7 +92,7 @@ def get_lines(data, faulty_strokes):
 
 
 def predict_stroke_position(stroke_index, lines, strokes):
-    print("predict_stroke_position")
+
     distances = []
     if len(strokes)-1 > stroke_index > 0:
         if lines[stroke_index-1][0] == lines[stroke_index+1][0]:
@@ -138,7 +136,7 @@ def predict_stroke_position(stroke_index, lines, strokes):
 
 
 def get_outlier_points(stroke, estimated_position, limit):
-    print("get_outlier_points")
+
     adjacency_matrix = np.ones((len(stroke), len(stroke)))
     for row in range(len(adjacency_matrix)):
         for col in range(len(adjacency_matrix[row])):
@@ -147,17 +145,15 @@ def get_outlier_points(stroke, estimated_position, limit):
             elif util.point_2_point(stroke[row], stroke[col]) > limit:
                 adjacency_matrix[row][col] = 0
 
-    print(adjacency_matrix)
-
-    adjacency_list = []
-    for row in adjacency_matrix:
-        adjacency_list.append(util.find_all(row, 1))
+    adjacency_list = OrderedDict()
+    for index, row in enumerate(adjacency_matrix):
+        adjacency_list[index] = util.find_all(row, 1)
 
     groups = []
     while len(adjacency_list) > 0:
         group = util.dfs(adjacency_list)
         groups.append(group)
-        for index, points in enumerate(adjacency_list[::-1]):
+        for index in group:
             if index in adjacency_list:
                 del adjacency_list[index]
 
@@ -166,17 +162,15 @@ def get_outlier_points(stroke, estimated_position, limit):
         if len(group) == 0:
             average_positions.append(get_points_from_index(group, stroke))
         else:
-            average_positions.append(util.get_average(get_points_from_index(group, stroke)))
+            average_positions.append(util.get_average_point(get_points_from_index(group, stroke)))
 
     distances = []
     for position in average_positions:
-        distances.append(util.point_2_point(position, estimated_position))
+        distances.append(util.point_2_point(position, util.Point(estimated_position[1], estimated_position[2])))
 
     closest_group = distances.index(min(distances))
 
-    points = [point for index, point in enumerate(stroke) if index not in groups[closest_group]]
-
-    points.append(closest_group)
+    points = [index for index, point in enumerate(stroke) if index not in groups[closest_group]]
 
     points.sort()
 

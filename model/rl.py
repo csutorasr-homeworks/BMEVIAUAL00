@@ -133,7 +133,7 @@ class Gui(tk.Frame):
 
     def clear(self):
         if self.file_name is not None:
-            xmlh.remove_outlier_points(self.file_name)
+            xmlh.remove_outliers(self.file_name)
             self.alg = alg.Algorithm(self.file_name)
             self.extract_data(self.file_name)
             self.update()

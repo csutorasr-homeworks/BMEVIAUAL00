@@ -91,6 +91,12 @@ def get_average(data):
     return sum(copy.copy(data))/len(data)
 
 
+def get_average_point(data):
+    x = sum([point.x for point in data])/len(data)
+    y = sum([point.y for point in data])/len(data)
+    return Point(x, y)
+
+
 def get_set_distance(data):
     """
     Calculates the distance between every single point of a given data set.
@@ -125,9 +131,15 @@ def find_all(data, value):
 def dfs(adjacency_list):
 
     grouped_points = set()
-    grouped_points.add(0)
 
-    grouped_points = grouped_points | _dfs(0, adjacency_list, grouped_points)
+    start, vertices = adjacency_list.popitem()
+
+    grouped_points.add(start)
+
+    for vertex in vertices:
+        if vertex not in grouped_points:
+            grouped_points.add(vertex)
+            _dfs(vertex, adjacency_list, grouped_points)
 
     return grouped_points
 
@@ -136,9 +148,8 @@ def _dfs(index, adjacency_list, grouped_points):
 
     for vertex in adjacency_list[index]:
         if vertex not in grouped_points:
-            index = vertex
             grouped_points.add(vertex)
-            _dfs(index, adjacency_list, grouped_points)
+            _dfs(vertex, adjacency_list, grouped_points)
 
     return grouped_points
 
@@ -151,6 +162,9 @@ def get_quartiles(data):
     """
     ordered_data = copy.copy(data)
     ordered_data.sort()
+
+    if len(data) < 3:
+        return data[0]-1, data[0], data[0]+1
 
     # Separating the odd and the even length cases.
     if len(ordered_data) % 2 == 1:
