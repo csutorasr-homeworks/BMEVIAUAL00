@@ -60,8 +60,8 @@ def get_outliers(data):
 
 
 def get_lines(data, faulty_strokes):
+    print("get_lines")
     distances = []
-
     correct_strokes = [stroke for stroke_index, stroke in enumerate(data) if stroke_index not in faulty_strokes]
     for stroke_index, stroke in enumerate(correct_strokes):
             median_x = util.get_quartiles([point.x for point in stroke])[2]
@@ -94,7 +94,7 @@ def get_lines(data, faulty_strokes):
 
 
 def predict_stroke_position(stroke_index, lines, strokes):
-
+    print("predict_stroke_position")
     distances = []
     if len(strokes)-1 > stroke_index > 0:
         if lines[stroke_index-1][0] == lines[stroke_index+1][0]:
@@ -138,7 +138,7 @@ def predict_stroke_position(stroke_index, lines, strokes):
 
 
 def get_outlier_points(stroke, estimated_position, limit):
-
+    print("get_outlier_points")
     adjacency_matrix = np.ones((len(stroke), len(stroke)))
     for row in range(len(adjacency_matrix)):
         for col in range(len(adjacency_matrix[row])):
@@ -146,6 +146,8 @@ def get_outlier_points(stroke, estimated_position, limit):
                 adjacency_matrix[row][col] = -1
             elif util.point_2_point(stroke[row], stroke[col]) > limit:
                 adjacency_matrix[row][col] = 0
+
+    print(adjacency_matrix)
 
     adjacency_list = []
     for row in adjacency_matrix:

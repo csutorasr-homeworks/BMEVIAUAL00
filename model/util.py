@@ -123,6 +123,7 @@ def find_all(data, value):
 
 
 def dfs(adjacency_list):
+
     grouped_points = set()
     grouped_points.add(0)
 
