@@ -93,9 +93,9 @@ def get_average(data):
 
 def get_average_point(data):
     """
-
-    :param data:
-    :return:
+    Calculates the average point value in a data set.
+    :param data: A list of points.
+    :return: Average point.
     """
     x = sum([point.x for point in data])/len(data)
     y = sum([point.y for point in data])/len(data)
@@ -120,10 +120,10 @@ def get_set_distance(data):
 
 def find_all(data, value):
     """
-
-    :param data:
-    :param value:
-    :return:
+    Returns the indexes of every occurrence of a value in a data set.
+    :param data: The data to be searched for the value.
+    :param value: The searched value
+    :return: Indexes of the occurrences.
     """
     indexes = []
     for index, element in enumerate(data):
@@ -135,9 +135,10 @@ def find_all(data, value):
 
 def dfs(adjacency_list):
     """
-
-    :param adjacency_list:
-    :return:
+    The implementation of depth first search algorithm.
+    :param adjacency_list: A dictionary, that contains every vertices as keys,
+    and the value of the keys are the adjacent vertices to the particular vertex.
+    :return: Set of the points that belong to the same graph.
     """
     grouped_points = set()
     start, vertices = adjacency_list.popitem()
@@ -153,18 +154,15 @@ def dfs(adjacency_list):
 
 def _dfs(index, adjacency_list, grouped_points):
     """
-
-    :param index:
-    :param adjacency_list:
-    :param grouped_points:
-    :return:
+    Recursive method in the dfs algorithm.
+    :param index: The starting vertex.
+    :param adjacency_list: The dictionary describing the adjacency relations between the vertices.
+    :param grouped_points: The set of points that belong in the same graph.
     """
     for vertex in adjacency_list[index]:
         if vertex not in grouped_points:
             grouped_points.add(vertex)
             _dfs(vertex, adjacency_list, grouped_points)
-
-    return grouped_points
 
 
 def get_quartiles(data):
@@ -179,7 +177,7 @@ def get_quartiles(data):
     if len(data) < 3:
         return data[0]-1, data[0], data[0]+1
 
-    # Separating the odd and the even length cases.
+    # Separating the odd and the even data length cases.
     if len(ordered_data) % 2 == 1:
         q2 = ordered_data[int(len(ordered_data) / 2)]
     else:
