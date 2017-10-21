@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ElementTree
 import util
 import numpy as np
-import copy
 from collections import OrderedDict
 
 
@@ -21,7 +20,7 @@ def remove_outliers(file_name):
         for point_index in reversed(stroke):
             root.find('StrokeSet')[stroke_index].remove(root.find('StrokeSet')[stroke_index][point_index])
 
-    # tree.write(file_name)
+    tree.write(file_name)
 
 
 def get_outliers(data, file_name):
@@ -33,21 +32,24 @@ def get_outliers(data, file_name):
     :return: Indexes of the points.
     """
 
-    # Calculating the limit of distance between two sequential points in the set of strokes.
-    point_length_limit = get_point_distance_limit(data)
+    timed_data = build_structure(file_name, time=True)
+    normalized_length_limit = get_point_distance_limit(timed_data, time=True)
 
-    print(point_length_limit)
     faulty_strokes = []
-    for stroke_index, stroke in enumerate(data):
+    for stroke_index, stroke in enumerate(timed_data):
         for index, point in enumerate(stroke[:-1]):
-                if util.point_2_point(stroke[index], stroke[index + 1]) > point_length_limit*2 and \
-                        stroke_index not in faulty_strokes:
+                if (util.point_2_point(stroke[index][0], stroke[index + 1][0]) /
+                        (stroke[index + 1][1] - stroke[index][1] if stroke[index + 1][1] != stroke[index][1]
+                         else 0.01)) > normalized_length_limit*2 and stroke_index not in faulty_strokes:
                     faulty_strokes.append(stroke_index)
 
     print(faulty_strokes)
 
     # Dividing the strokes into lines.
     lines = get_lines(data, faulty_strokes, file_name)
+
+    # Calculating the limit of distance between two sequential points in the set of strokes.
+    point_length_limit = get_point_distance_limit(data)
 
     # Ordered dictionary of faulty strokes as keys, and lists of the faulty points' indexes as values.
     points = OrderedDict()
@@ -248,17 +250,23 @@ def get_outlier_points(stroke, estimated_position, limit):
     return [index for index, point in enumerate(stroke) if index not in groups[closest_group]]
 
 
-def get_point_distance_limit(data):
+def get_point_distance_limit(data, time=False):
     """
     Creates the statistics on the data, by the measurement of the distance
      between the registered points in each stroke.
+    :param time: Flag, whether the average distance should be normalized by the delta time.
     :param data: Stroke set.
     :return: Length limit, that defines the outlier distance.
     """
     distances = []
     for stroke_index, stroke in enumerate(data):
         for point_index, point in enumerate(stroke[:-1]):
-            distances.append(util.point_2_point(stroke[point_index], stroke[point_index+1]))
+            if time:
+                distances.append(util.point_2_point(stroke[point_index][0], stroke[point_index + 1][0]) /
+                                 (stroke[point_index + 1][1] - stroke[point_index][1]) if
+                                     stroke[point_index + 1][1] != stroke[point_index][1] else 0.01)
+            else:
+                distances.append(util.point_2_point(stroke[point_index], stroke[point_index+1]))
 
     q1, q2, q3 = util.get_quartiles(distances)
 
@@ -288,7 +296,7 @@ def build_structure(file_name, time=False):
     """
     Creates a multi layer list structure of the given xml.
     :param file_name: Name of the XML.
-    :param time:
+    :param time: Flag, whether the time data from the xml is required.
     :return: The structured list of the XML.
     """
     with open(file_name, 'r') as file:
@@ -300,7 +308,7 @@ def build_structure(file_name, time=False):
         if time:
             for index in range(len(root.find('StrokeSet'))):
                 strokes.append([(util.Point(float(point.attrib['x']), float(point.attrib['y'])),
-                                 point.attrib['time'])
+                                 float(point.attrib['time']))
                                 for point in root.find('StrokeSet')[index][:]])
         else:
             for index in range(len(root.find('StrokeSet'))):
