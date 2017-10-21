@@ -20,7 +20,7 @@ def remove_outliers(file_name):
         for point_index in reversed(stroke):
             root.find('StrokeSet')[stroke_index].remove(root.find('StrokeSet')[stroke_index][point_index])
 
-    # tree.write(file_name)
+    tree.write(file_name)
 
 
 def get_outliers(data, file_name):
@@ -43,8 +43,6 @@ def get_outliers(data, file_name):
                         (stroke[index + 1][1] - stroke[index][1] if stroke[index + 1][1] != stroke[index][1]
                          else 0.01)) > normalized_length_limit*2 and stroke_index not in faulty_strokes:
                     faulty_strokes.append(stroke_index)
-
-    print(faulty_strokes)
 
     # Dividing the strokes into lines.
     lines = get_lines(data, faulty_strokes, file_name)
