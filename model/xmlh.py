@@ -4,6 +4,9 @@ import numpy as np
 from collections import OrderedDict
 
 
+estimated_stroke_coordinates = []
+
+
 def remove_outliers(file_name):
     """
     Finds and removes the outlier points from the stroke in the given file.
@@ -20,7 +23,7 @@ def remove_outliers(file_name):
         for point_index in reversed(stroke):
             root.find('StrokeSet')[stroke_index].remove(root.find('StrokeSet')[stroke_index][point_index])
 
-    tree.write(file_name)
+    # tree.write(file_name)
 
 
 def get_outliers(data, file_name):
@@ -43,6 +46,13 @@ def get_outliers(data, file_name):
                         (stroke[index + 1][1] - stroke[index][1] if stroke[index + 1][1] != stroke[index][1]
                          else 0.01)) > normalized_length_limit*2 and stroke_index not in faulty_strokes:
                     faulty_strokes.append(stroke_index)
+    # 41
+    asd = 41
+    print(util.point_2_point(timed_data[5][asd][0], timed_data[5][asd + 1][0])
+           /(timed_data[5][asd + 1][1] - timed_data[5][asd][1] if timed_data[5][asd + 1][1] != timed_data[5][asd][1]
+                          else 0.01))
+
+    print(normalized_length_limit*2)
 
     # Dividing the strokes into lines.
     lines = get_lines(data, faulty_strokes, file_name)
@@ -347,7 +357,7 @@ def build_structure(file_name, time=False):
 
 def main():
     pass
-    # remove_outliers('/home/patrik/Desktop/TestStrokes/f04/f04-314/strokesz.xml')
+    remove_outliers('/home/patrik/Desktop/TestStrokes/strokesw.xml')
     # dump_results('/home/patrik/Desktop/TestStrokes/strokesz.xml', "asd", "kaki", "majom")
 
 
