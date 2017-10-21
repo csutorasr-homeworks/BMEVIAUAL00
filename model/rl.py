@@ -110,7 +110,6 @@ class Gui(tk.Frame):
     def center(self):
         """
         Adjusts the window to the center of the screen.
-        :return:
         """
         self.gui_root.update_idletasks()
         width = self.gui_root.winfo_width()
@@ -177,7 +176,6 @@ class Gui(tk.Frame):
                                         fill="green")
 
     def load(self):
-        user = getpass.getuser()
         file_name = askopenfilename(filetypes=(("XML files", "*.xml"), ("All files", "*.*")),
                                     initialdir='/home/patrik/Desktop/TestStrokes')
         if file_name:
@@ -194,7 +192,6 @@ class Gui(tk.Frame):
         """
         Gathers the stroke data from the xml.
         :param file: String, containing the absolute path of the file.
-        :return:
         """
         tree = ElementTree.parse(file)
         xml_root = tree.getroot()

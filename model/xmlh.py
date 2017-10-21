@@ -278,16 +278,43 @@ def mark_horizontal(file_name, indexes):
     Creates an attribute in the given file, for every stroke,
      and gives it value, based on if it is horizontal or not.
     :param file_name: Name of the xml.
-    :param indexes: Horizontal indexes, that will be marked as "Yes".
+    :param indexes: Indexes of horizontal strokes in the stroke set, that will be marked as "Yes".
     """
     tree = ElementTree.parse(file_name)
     root = tree.getroot()
 
-    for i in range(len(root.find('StrokeSet'))):
-        if i in indexes:
-            root.find('StrokeSet')[i].attrib['Horizontal'] = "Yes"
+    for index in range(len(root.find('StrokeSet'))):
+        if index in indexes:
+            root.find('StrokeSet')[index].attrib['Horizontal'] = "Yes"
         else:
-            root.find('StrokeSet')[i].attrib['Horizontal'] = "No"
+            root.find('StrokeSet')[index].attrib['Horizontal'] = "No"
+
+    tree.write(file_name)
+
+
+def dump_results(file_name, calculated_handedness=None, algorithm_log=None, manual_handedness=None):
+    """
+    Writes the gives values into the XML file, under the Results tag.
+    :param file_name: Path of the XML file.
+    :param calculated_handedness: The automatically calculated handedness value.
+    :param algorithm_log: The user's description.
+    :param manual_handedness: The handedness value determined by the user.
+    """
+    tree = ElementTree.parse(file_name)
+    root = tree.getroot()
+    general = root.find('General')
+
+    if 'Results' not in [element.tag for element in general]:
+        general.append(ElementTree.Element('Results'))
+
+    if calculated_handedness is not None:
+        general.find('Results').attrib['CalculatedHandedness'] = calculated_handedness
+
+    if algorithm_log is not None:
+        general.find('Results').attrib['AlgorithmLog'] = algorithm_log
+
+    if manual_handedness is not None:
+        general.find('Results').attrib['ManualHandedness'] = manual_handedness
 
     tree.write(file_name)
 
@@ -319,7 +346,9 @@ def build_structure(file_name, time=False):
 
 
 def main():
-    remove_outliers('/home/patrik/Desktop/TestStrokes/f04/f04-314/strokesz.xml')
+    pass
+    # remove_outliers('/home/patrik/Desktop/TestStrokes/f04/f04-314/strokesz.xml')
+    # dump_results('/home/patrik/Desktop/TestStrokes/strokesz.xml', "asd", "kaki", "majom")
 
 
 if __name__ == "__main__":
