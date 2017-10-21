@@ -20,7 +20,7 @@ def remove_outliers(file_name):
         for point_index in reversed(stroke):
             root.find('StrokeSet')[stroke_index].remove(root.find('StrokeSet')[stroke_index][point_index])
 
-    tree.write(file_name)
+    # tree.write(file_name)
 
 
 def get_outliers(data, file_name):
@@ -31,8 +31,9 @@ def get_outliers(data, file_name):
     :param file_name: The file that will be scanned for outliers.
     :return: Indexes of the points.
     """
-
+    # Calculating the limit of the distance between two points in each stroke.
     timed_data = build_structure(file_name, time=True)
+    # The distances are divided by the delta time between sampling, to adjust to the uneven periods.
     normalized_length_limit = get_point_distance_limit(timed_data, time=True)
 
     faulty_strokes = []
@@ -51,7 +52,7 @@ def get_outliers(data, file_name):
     # Calculating the limit of distance between two sequential points in the set of strokes.
     point_length_limit = get_point_distance_limit(data)
 
-    # Ordered dictionary of faulty strokes as keys, and lists of the faulty points' indexes as values.
+    # Ordered dictionary of faulty strokes indexes as keys, and lists of the faulty points' indexes as values.
     points = OrderedDict()
     for stroke_index in faulty_strokes:
         points[stroke_index] = get_outlier_points(data[stroke_index], lines[stroke_index], point_length_limit)
@@ -90,8 +91,8 @@ def get_lines(data, faulty_strokes, file_name):
     correct_strokes = [stroke for stroke_index, stroke in enumerate(data) if stroke_index not in faulty_strokes]
     for stroke_index, stroke in enumerate(correct_strokes):
             median_x = util.get_quartiles([point.x for point in stroke])[2]
-            if stroke_index < len(data) - 1:
-                next_median_x = util.get_quartiles([point.x for point in data[stroke_index + 1]])[2]
+            if stroke_index < len(correct_strokes) - 1:
+                next_median_x = util.get_quartiles([point.x for point in correct_strokes[stroke_index + 1]])[2]
                 distances.append(util.point_2_point(util.Point(median_x, 0), util.Point(next_median_x, 0)))
 
     distances.sort()
@@ -101,12 +102,13 @@ def get_lines(data, faulty_strokes, file_name):
 
     lines = []
     index = 0
+
     # Creation of the data structure, that stores the line sequence number, the x and the y median values of a stroke.
-    for stroke_index, stroke in enumerate(data):
+    for stroke_index, stroke in enumerate(correct_strokes):
         median_x = util.get_quartiles([point.x for point in stroke])[2]
         median_y = util.get_quartiles([point.y for point in stroke])[2]
-        if stroke_index < len(data) - 1:
-            next_median_x = util.get_quartiles([point.x for point in data[stroke_index + 1]])[2]
+        if stroke_index < len(correct_strokes) - 1:
+            next_median_x = util.get_quartiles([point.x for point in correct_strokes[stroke_index + 1]])[2]
             if util.point_2_point(util.Point(median_x, 0), util.Point(next_median_x, 0)) > length_limit:
                 index += 1
         # The list of faulty strokes are ignored in this step, since the iterated data is the list of correct strokes.
@@ -319,7 +321,7 @@ def build_structure(file_name, time=False):
 
 
 def main():
-    remove_outliers('/home/patrik/Desktop/TestStrokes/corrected/c04-161.xml')
+    remove_outliers('/home/patrik/Desktop/TestStrokes/f04/f04-314/strokesz.xml')
 
 
 if __name__ == "__main__":
