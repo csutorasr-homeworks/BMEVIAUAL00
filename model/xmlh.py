@@ -296,7 +296,7 @@ def mark_horizontal(file_name, indexes):
 
 def build_structure(file_name, time=False):
     """
-    Creates a multi layer list structure of the given xml.
+    Creates a multi layer list structure from the strokes of the given xml.
     :param file_name: Name of the XML.
     :param time: Flag, whether the time data from the xml is required.
     :return: The structured list of the XML.
