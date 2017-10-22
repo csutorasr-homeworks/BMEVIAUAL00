@@ -71,7 +71,6 @@ def parse_files(location):
     """
     Iterates through the Data directory and gathers the strokes from all of the xml files.
     :param location: String, contains the root directory of the xml files.
-    :return:
     """
     loc = copy.copy(location)
     content = os.listdir(loc)

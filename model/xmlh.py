@@ -4,7 +4,8 @@ import numpy as np
 from collections import OrderedDict
 
 
-error_threshold = 4
+# The constant that multiplies the outlier detector limit
+limit_multiplier = 4
 
 
 def remove_outliers(file_name):
@@ -50,7 +51,7 @@ def get_outliers(data, file_name):
 
         q1, q2, q3 = util.get_quartiles(distances)
 
-        return (q3 + 1.5 * (q3 - q1)) * error_threshold
+        return (q3 + 1.5 * (q3 - q1)) * limit_multiplier
 
     def get_faulty_strokes(time_data, limit):
         """
@@ -315,7 +316,7 @@ def get_point_distance_limit(data, time=False):
 
     q1, q2, q3 = util.get_quartiles(distances)
 
-    return (q3 + 1.5 * (q3 - q1)) * error_threshold
+    return (q3 + 1.5 * (q3 - q1)) * limit_multiplier
 
 
 def mark_horizontal(file_name, indexes):
