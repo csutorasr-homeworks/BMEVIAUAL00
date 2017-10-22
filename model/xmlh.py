@@ -4,7 +4,7 @@ import numpy as np
 from collections import OrderedDict
 
 
-estimated_stroke_coordinates = []
+error_threshold = 4
 
 
 def remove_outliers(file_name):
@@ -23,7 +23,7 @@ def remove_outliers(file_name):
         for point_index in reversed(stroke):
             root.find('StrokeSet')[stroke_index].remove(root.find('StrokeSet')[stroke_index][point_index])
 
-    # tree.write(file_name)
+    tree.write(file_name)
 
 
 def get_outliers(data, file_name):
@@ -34,25 +34,55 @@ def get_outliers(data, file_name):
     :param file_name: The file that will be scanned for outliers.
     :return: Indexes of the points.
     """
+    def get_stroke_length_limit(time_data):
+        """
+        Calculates the length limit for the strokes. Their length is divided by the delta time,
+        to adjust to the faulty data.
+        :param time_data: The stroke set, with time labels.
+        :return: Length limit times the error threshold.
+        """
+        distances = []
+        for element in time_data:
+            distance = 0
+            for point_index, p in enumerate(element[:-1]):
+                distance += util.point_2_point(p[0], element[point_index + 1][0])
+            distances.append(distance/(element[-1][1]-element[0][1] if element[-1][1] != element[0][1] else 0.01))
+
+        q1, q2, q3 = util.get_quartiles(distances)
+
+        return (q3 + 1.5 * (q3 - q1)) * error_threshold
+
+    def get_faulty_strokes(time_data, limit):
+        """
+        Finds the faulty strokes in the data, by comparing the distance values to the limit.
+        :param time_data: The stroke set, with time labels.
+        :param limit: Length limit.
+        :return: List of the faulty strokes.
+        """
+        f_strokes = []
+        for element_index, element in enumerate(time_data):
+            distance = 0
+            for point_index, p in enumerate(element[:-1]):
+                distance += util.point_2_point(p[0], element[point_index + 1][0])
+            if distance/(element[-1][1]-element[0][1] if element[-1][1] != element[0][1] else 0.01) > limit:
+                f_strokes.append(element_index)
+
+        return f_strokes
+
     # Calculating the limit of the distance between two points in each stroke.
     timed_data = build_structure(file_name, time=True)
     # The distances are divided by the delta time between sampling, to adjust to the uneven periods.
-    normalized_length_limit = get_point_distance_limit(timed_data, time=True)
+    normalized_length_limit = get_stroke_length_limit(timed_data)
 
-    faulty_strokes = []
+    faulty_strokes = get_faulty_strokes(timed_data, normalized_length_limit)
     for stroke_index, stroke in enumerate(timed_data):
         for index, point in enumerate(stroke[:-1]):
                 if (util.point_2_point(stroke[index][0], stroke[index + 1][0]) /
                         (stroke[index + 1][1] - stroke[index][1] if stroke[index + 1][1] != stroke[index][1]
                          else 0.01)) > normalized_length_limit*2 and stroke_index not in faulty_strokes:
                     faulty_strokes.append(stroke_index)
-    # 41
-    asd = 41
-    print(util.point_2_point(timed_data[5][asd][0], timed_data[5][asd + 1][0])
-           /(timed_data[5][asd + 1][1] - timed_data[5][asd][1] if timed_data[5][asd + 1][1] != timed_data[5][asd][1]
-                          else 0.01))
 
-    print(normalized_length_limit*2)
+    print(faulty_strokes)
 
     # Dividing the strokes into lines.
     lines = get_lines(data, faulty_strokes, file_name)
@@ -115,6 +145,9 @@ def get_lines(data, faulty_strokes, file_name):
     for stroke_index, stroke in enumerate(correct_strokes):
         median_x = util.get_quartiles([point.x for point in stroke])[2]
         median_y = util.get_quartiles([point.y for point in stroke])[2]
+
+        lines.append((index, median_x, median_y))
+
         if stroke_index < len(correct_strokes) - 1:
             next_median_x = util.get_quartiles([point.x for point in correct_strokes[stroke_index + 1]])[2]
             if util.point_2_point(util.Point(median_x, 0), util.Point(next_median_x, 0)) > length_limit:
@@ -122,7 +155,8 @@ def get_lines(data, faulty_strokes, file_name):
         # The list of faulty strokes are ignored in this step, since the iterated data is the list of correct strokes.
         # Reason for this is the extraordinary values in the faulty strokes, which prevent the correct calculation of
         # the stroke's location.
-        lines.append((index, median_x, median_y))
+
+    faulty_strokes.sort()
 
     # The faulty strokes are inserted into the list in this step, with the predicted locations.
     for stroke_index in faulty_strokes:
@@ -147,21 +181,22 @@ def predict_stroke_position(stroke_index, lines, strokes):
     # The distances list stores the distance between the strokes' position in the line.
     distances = []
     # The stroke is not at the first or final index. The values of the surrounding strokes can be used.
-    if len(strokes) - 1 > stroke_index > 0:
-        # lines[stroke_index] is a tuple, which first element is the sequence number of the line.
+    if len(lines) > stroke_index > 0:
+
+        # lines[stroke_index] is a tuple, of which first element is the sequence number of the line.
         # If the stroke's previous and next neighbours are in the same line, then the stroke is in that line.
-        if lines[stroke_index - 1][0] == lines[stroke_index + 1][0]:
+        if lines[stroke_index - 1][0] == lines[stroke_index][0]:
             line_index = lines[stroke_index-1][0]
         # If they are in different lines, then the stroke must be either at the end of the line or at the beginning.
         else:
             prev_median_y = util.get_average([stroke[2] for stroke in lines if stroke[0] == lines[stroke_index - 1][0]])
-            next_median_y = util.get_average([stroke[2] for stroke in lines if stroke[0] == lines[stroke_index + 1][0]])
+            next_median_y = util.get_average([stroke[2] for stroke in lines if stroke[0] == lines[stroke_index][0]])
             # The stroke will be placed in the line, in which the stroke is closest to its possible location.
             line_index = lines[stroke_index - 1][0] if\
                 util.point_2_set(util.Point(lines[stroke_index - 1][1], prev_median_y),
                                  strokes[stroke_index]) <\
-                util.point_2_set(util.Point(lines[stroke_index + 1][1], next_median_y),
-                                 strokes[stroke_index]) else lines[stroke_index + 1][0]
+                util.point_2_set(util.Point(lines[stroke_index][1], next_median_y),
+                                 strokes[stroke_index]) else lines[stroke_index][0]
 
         x_medians = [stroke[1] for stroke in lines if stroke[0] == line_index]
 
@@ -174,16 +209,16 @@ def predict_stroke_position(stroke_index, lines, strokes):
             x_coordinate = lines[stroke_index - 1][1] + util.get_average(distances)
         # If its in the next line, the same principle is applied.
         else:
-            x_coordinate = lines[stroke_index + 1][1] - util.get_average(distances)
+            x_coordinate = lines[stroke_index][1] - util.get_average(distances)
 
     # The stroke is the first in the stroke set.
     elif stroke_index == 0:
-        line_index = lines[stroke_index + 1][0]
+        line_index = lines[stroke_index][0]
         x_medians = [stroke[1] for stroke in lines if stroke[0] == line_index]
         for index, x_median in enumerate(x_medians[:-1]):
             distances.append(util.point_2_point(util.Point(x_median, 0), util.Point(x_medians[index + 1], 0)))
 
-        x_coordinate = lines[stroke_index + 1][1] - util.get_average(distances)
+        x_coordinate = lines[stroke_index][1] - util.get_average(distances)
 
     # The stroke is the final stroke in the set.
     else:
@@ -225,7 +260,7 @@ def get_outlier_points(stroke, estimated_position, limit):
         for col in range(len(adjacency_matrix[row])):
             if row == col:
                 adjacency_matrix[row][col] = -1
-            elif util.point_2_point(stroke[row], stroke[col]) > limit*2:
+            elif util.point_2_point(stroke[row], stroke[col]) > limit:
                 adjacency_matrix[row][col] = 0
 
     # The matrix is converted into a dict, that stores the vertex sequence numbers as keys, and
@@ -280,7 +315,7 @@ def get_point_distance_limit(data, time=False):
 
     q1, q2, q3 = util.get_quartiles(distances)
 
-    return q3 + 1.5 * (q3 - q1)
+    return (q3 + 1.5 * (q3 - q1)) * error_threshold
 
 
 def mark_horizontal(file_name, indexes):
@@ -357,8 +392,6 @@ def build_structure(file_name, time=False):
 
 def main():
     pass
-    remove_outliers('/home/patrik/Desktop/TestStrokes/strokesw.xml')
-    # dump_results('/home/patrik/Desktop/TestStrokes/strokesz.xml', "asd", "kaki", "majom")
 
 
 if __name__ == "__main__":
