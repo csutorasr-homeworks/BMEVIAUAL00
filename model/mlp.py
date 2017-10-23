@@ -79,21 +79,26 @@ class Sequential:
         else:
             self.layers.append(layer)
 
-    def fit(self, x_train, y_train, epochs = 100, batch_size):
+    def fit(self, x_train, y_train, epochs=100, batch_size=32):
+
+        data_set = [(x_train[index], y_train[index]) for index in range(len(x_train))]
 
         deltas = []
 
-        for epoch in epochs
+        for epoch in range(epochs):
 
-        input_data =
-        for layer in self.layers:
-            layer.propagate_forward(input_data)
-            input_data = layer.output
+            for data_index, element in enumerate(data_set[::batch_size]):
+                if data_index == 0:
+                    continue
+                data = data_set[data_index-batch_size:data_index, 0]
+                for layer in self.layers:
+                    layer.propagate_forward(data[0])
+                    input_data = layer.output
 
+                error = -(data[1] - self.layers[-1].output)
 
-
-        for layer in self.layers[::-1]:
-            pass
+                for layer in self.layers[::-1]:
+                    pass
 
     def compile(self, loss, optimizer):
         pass
