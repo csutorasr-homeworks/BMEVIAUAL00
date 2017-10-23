@@ -64,6 +64,7 @@ class Sequential:
 
     def __init__(self):
         self.layers = []
+        self.learning_rate = None
 
     def add(self, layer):
 
@@ -83,22 +84,35 @@ class Sequential:
 
         data_set = [(x_train[index], y_train[index]) for index in range(len(x_train))]
 
-        deltas = []
-
         for epoch in range(epochs):
 
             for data_index, element in enumerate(data_set[::batch_size]):
+
+                deltas = []
+
                 if data_index == 0:
                     continue
+
                 data = data_set[data_index-batch_size:data_index, 0]
+                input_data = data[0]
+
                 for layer in self.layers:
-                    layer.propagate_forward(data[0])
+                    layer.propagate_forward(input_data)
                     input_data = layer.output
 
                 error = -(data[1] - self.layers[-1].output)
 
-                for layer in self.layers[::-1]:
-                    pass
+                delta = np.multiply(error, self.layers[-1].d_activation(np.dot(self.layers[-2].output,
+                                                                               self.layers[-1].weights)))
+                deltas.append(delta)
+                for layer_index, layer in enumerate(self.layers[-2:0:-1]):
+                    delta = np.dot(deltas[0], layer.weights.T) * \
+                            layer.d_activation(np.dot(self.layers[layer_index - 1].output,
+                                                      self.layers[layer_index - 1].weights))
+                    deltas.insert(0, delta)
+
+                for layer in self.layers:
+                    layer.modify_weights()
 
     def compile(self, loss, optimizer):
         pass
