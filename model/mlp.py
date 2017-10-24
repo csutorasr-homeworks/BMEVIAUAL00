@@ -4,13 +4,13 @@ import func
 
 class Dense:
 
-    def __init__(self, units, input_dim=None, activation=func.linear):
+    def __init__(self, units, input_dim=None, activation='linear'):
 
         self.input_dim = input_dim + 1
         self.units = units
 
-        self.activation = Activation(activation)
-        self.d_activation = func.functions[activation]
+        self.activation = func.functions[activation][0]
+        self.d_activation = func.functions[activation][1]
 
         self.weights = np.random.random((input_dim, units))
         self.dw = np.zeros(self.weights.shape)
@@ -29,8 +29,8 @@ class Dense:
     def add(self, activation=None, dropout=None, batch_normalization=None):
 
         if activation is not None:
-            self.activation = activation
-            self.d_activation = func.functions[activation]
+            self.activation = func.functions[activation][0]
+            self.d_activation = func.functions[activation][1]
 
         if dropout is not None:
             self.dropout = dropout
@@ -69,7 +69,7 @@ class Sequential:
     def add(self, layer):
 
         if type(layer) is Activation:
-            self.layers[-1].add(activation=layer)
+            self.layers[-1].add(activation=layer.activation_function)
 
         elif type(layer) is Dropout:
             self.layers[-1].add(dropout=layer)
@@ -107,12 +107,12 @@ class Sequential:
                 deltas.append(delta)
                 for layer_index, layer in enumerate(self.layers[-2:0:-1]):
                     delta = np.dot(deltas[0], layer.weights.T) * \
-                            layer.d_activation(np.dot(self.layers[layer_index - 1].output,
+                            layer.d_activation(np.dot(self.layers[layer_index - 2].output,
                                                       self.layers[layer_index - 1].weights))
                     deltas.insert(0, delta)
 
-                for layer in self.layers:
-                    layer.modify_weights()
+                for layer_index, layer in enumerate(self.layers):
+                    layer.modify_weights(deltas[layer_index], learning_rate=self.learning_rate)
 
     def compile(self, loss, optimizer):
         pass
@@ -124,6 +124,7 @@ class Sequential:
 def main():
     model = Sequential()
     model.add(Dense(units=4, input_dim=4))
+    model.add(Activation('relu'))
 
 
 if __name__ == "__main__":

@@ -10,11 +10,11 @@ def d_tangent_hyperbolic(x):
 
 
 def sigmoid(x):
-    return 1/(1 - np.exp(-x))
+    return 1/(1 + np.exp(-x))
 
 
 def d_sigmoid(x):
-    return x
+    np.exp(-x)/(1 + np.exp(-x))**2
 
 
 def relu(x):
@@ -22,7 +22,7 @@ def relu(x):
 
 
 def d_relu(x):
-    return x
+    return 1 if x > 0 else 0
 
 
 def linear(x):
@@ -30,11 +30,11 @@ def linear(x):
 
 
 def d_linear(x):
-    return x
+    return 1
 
 
-functions = {tangent_hyperbolic: d_tangent_hyperbolic,
-             sigmoid: d_sigmoid,
-             relu: d_relu,
-             linear: d_linear}
+functions = {'tanh': (tangent_hyperbolic, d_tangent_hyperbolic),
+             'sigmoid': (sigmoid, d_sigmoid),
+             'relu': (relu, d_relu),
+             'linear': (linear, d_linear)}
 
