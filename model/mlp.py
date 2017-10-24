@@ -18,8 +18,7 @@ class Dense:
         self.input_dim = input_dim
         self.units = units
 
-        self.activation = func.functions[activation][0]
-        self.d_activation = func.functions[activation][1]
+        self.activation = Activation(activation)
 
         if input_dim is not None:
             self.weights = np.random.random((input_dim + 1, units))
@@ -31,8 +30,10 @@ class Dense:
         self.batch_normalization = None
 
     def propagate_forward(self, input_data):
-        data = np.ones((1, input_data+1))
-        data[:-1] = input_data
+        data = np.ones((1, self.input_dim+1))
+        print(data.shape)
+        print(input_data.shape)
+        data[:-1, 1] = input_data
         self.output = self.activation.function(data, self.weights)
 
     def modify_weights(self, learning_rate, delta):
@@ -41,8 +42,7 @@ class Dense:
     def add(self, activation=None, dropout=None, batch_normalization=None):
 
         if activation is not None:
-            self.activation = func.functions[activation][0]
-            self.d_activation = func.functions[activation][1]
+            self.activation = activation
 
         if dropout is not None:
             self.dropout = dropout
@@ -54,10 +54,14 @@ class Dense:
 class Activation:
 
     def __init__(self, activation_function):
-        self.activation_function = activation_function
+        self.activation_function = func.functions[activation_function][0]
+        self.d_activation_function = func.functions[activation_function][1]
 
     def function(self, input_data, weights):
-        return self.activation_function(input_data*weights)
+        return self.activation_function(np.dot(input_data, weights))
+
+    def d_function(self, input_data, weights):
+        return self.d_activation_function(np.dot(input_data, weights))
 
 
 class Dropout:
@@ -81,7 +85,7 @@ class Sequential:
     def add(self, layer):
 
         if type(layer) is Activation:
-            self.layers[-1].add(activation=layer.activation_function)
+            self.layers[-1].add(activation=layer)
 
         elif type(layer) is Dropout:
             self.layers[-1].add(dropout=layer)
@@ -98,36 +102,37 @@ class Sequential:
 
     def fit(self, x_train, y_train, epochs=100, batch_size=32):
 
-        data_set = [(x_train[index], y_train[index]) for index in range(len(x_train))]
+        data_set = np.array([(x_train[index], y_train[index]) for index in range(len(x_train))])
 
         for epoch in range(epochs):
 
-            for data_index, element in enumerate(data_set[::batch_size]):
-                if data_index == 0:
-                    continue
+            for index, element in enumerate(data_set[::batch_size]):
 
                 deltas = []
 
-                data = data_set[data_index-batch_size:data_index, 0]
-                input_data = data[0]
+                data = data_set[index:index+batch_size]
 
+                input_data = data[:, 0]
                 for layer in self.layers:
                     layer.propagate_forward(input_data)
                     input_data = layer.output
 
-                error = -(data[1] - self.layers[-1].output)
+                error = -(data[:, 1] - self.layers[-1].output)
 
-                delta = np.multiply(error, self.layers[-1].d_activation(np.dot(self.layers[-2].output,
-                                                                               self.layers[-1].weights)))
+                delta = np.multiply(error, self.layers[-1].activation.d_function(np.dot(self.layers[-2].output,
+                                                                                        self.layers[-1].weights)))
+
                 deltas.append(delta)
-                for layer_index, layer in enumerate(self.layers[-2::-1]):
-                    delta = np.dot(deltas[0], layer.weights.T) * \
-                            layer.d_activation(np.dot(self.layers[layer_index - 2].output,
-                                                      self.layers[layer_index - 1].weights))
+                for layer_index, layer in enumerate(self.layers[-2:0:-1]):
+                    delta = np.dot(deltas[0], self.layers[layer_index + 1].weights.T) * \
+                            layer.activation.d_function(np.dot(self.layers[layer_index - 1].output,
+                                                                self.layers[layer_index].weights))
                     deltas.insert(0, delta)
 
-                for layer_index, layer in enumerate(self.layers):
-                    layer.modify_weights(deltas[layer_index], learning_rate=self.learning_rate)
+                for layer_index, layer in enumerate(self.layers[1:]):
+                    layer.modify_weights(deltas[layer_index-1], learning_rate=self.learning_rate)
+
+                print("asd")
 
     def compile(self, loss, optimizer):
         pass
@@ -138,10 +143,10 @@ class Sequential:
 
 def main():
     model = Sequential()
-    model.add(Dense(units=4, input_dim=4))
+    model.add(Dense(units=4, input_dim=2))
     model.add(Activation('relu'))
     model.add(Dense(units=5))
-    print(model.layers)
+    model.fit(np.array([[1, 2]]), np.array([1]), batch_size=1)
 
 
 if __name__ == "__main__":
