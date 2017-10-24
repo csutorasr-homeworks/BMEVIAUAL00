@@ -2,18 +2,28 @@ import numpy as np
 import func
 
 
+class Input:
+
+    def __init__(self):
+        self.output = None
+
+    def propagate_forward(self, input_data):
+        self.output = input_data
+
+
 class Dense:
 
     def __init__(self, units, input_dim=None, activation='linear'):
 
-        self.input_dim = input_dim + 1
+        self.input_dim = input_dim
         self.units = units
 
         self.activation = func.functions[activation][0]
         self.d_activation = func.functions[activation][1]
 
-        self.weights = np.random.random((input_dim, units))
-        self.dw = np.zeros(self.weights.shape)
+        if input_dim is not None:
+            self.weights = np.random.random((input_dim + 1, units))
+            self.dw = np.zeros(self.weights.shape)
 
         self.output = None
 
@@ -21,7 +31,9 @@ class Dense:
         self.batch_normalization = None
 
     def propagate_forward(self, input_data):
-        self.output = self.activation.function(input_data, self.weights)
+        data = np.ones((1, input_data+1))
+        data[:-1] = input_data
+        self.output = self.activation.function(data, self.weights)
 
     def modify_weights(self, learning_rate, delta):
         self.weights -= learning_rate*np.dot(self.output.T, delta)
@@ -77,8 +89,12 @@ class Sequential:
         elif type(layer) is BatchNorm:
             self.layers[-1].add(batch_normalization=layer)
 
-        else:
+        elif len(self.layers) == 0:
+            self.layers.append(Input())
             self.layers.append(layer)
+
+        else:
+            self.layers.append(Dense(units=layer.units, input_dim=self.layers[-1].units))
 
     def fit(self, x_train, y_train, epochs=100, batch_size=32):
 
@@ -87,11 +103,10 @@ class Sequential:
         for epoch in range(epochs):
 
             for data_index, element in enumerate(data_set[::batch_size]):
-
-                deltas = []
-
                 if data_index == 0:
                     continue
+
+                deltas = []
 
                 data = data_set[data_index-batch_size:data_index, 0]
                 input_data = data[0]
@@ -105,7 +120,7 @@ class Sequential:
                 delta = np.multiply(error, self.layers[-1].d_activation(np.dot(self.layers[-2].output,
                                                                                self.layers[-1].weights)))
                 deltas.append(delta)
-                for layer_index, layer in enumerate(self.layers[-2:0:-1]):
+                for layer_index, layer in enumerate(self.layers[-2::-1]):
                     delta = np.dot(deltas[0], layer.weights.T) * \
                             layer.d_activation(np.dot(self.layers[layer_index - 2].output,
                                                       self.layers[layer_index - 1].weights))
@@ -125,6 +140,8 @@ def main():
     model = Sequential()
     model.add(Dense(units=4, input_dim=4))
     model.add(Activation('relu'))
+    model.add(Dense(units=5))
+    print(model.layers)
 
 
 if __name__ == "__main__":
