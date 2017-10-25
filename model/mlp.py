@@ -7,7 +7,7 @@ class Input:
     def __init__(self):
         self.output = None
 
-    def propagate_forward(self, input_data):
+    def propagate_forward(self, input_data, batch_size):
         self.output = input_data
 
 
@@ -24,16 +24,20 @@ class Dense:
             self.weights = np.random.random((input_dim + 1, units))
             self.dw = np.zeros(self.weights.shape)
 
+        self.batch_size = None
         self.output = None
 
         self.dropout = None
         self.batch_normalization = None
 
-    def propagate_forward(self, input_data):
-        data = np.ones((1, self.input_dim+1))
-        print(data.shape)
-        print(input_data.shape)
-        data[:-1, 1] = input_data
+    def propagate_forward(self, input_data, batch_size):
+        # Todo
+        data = np.ones((1, (self.input_dim+1)*batch_size))
+        print(input_data)
+        for index in range(len(input_data)):
+            data[0, index * batch_size] = input_data[index][0]
+            data[0, index * batch_size + 1] = input_data[index][1]
+
         self.output = self.activation.function(data, self.weights)
 
     def modify_weights(self, learning_rate, delta):
@@ -54,8 +58,8 @@ class Dense:
 class Activation:
 
     def __init__(self, activation_function):
-        self.activation_function = func.functions[activation_function][0]
-        self.d_activation_function = func.functions[activation_function][1]
+        self.activation_function = func.activations[activation_function][0]
+        self.d_activation_function = func.activations[activation_function][1]
 
     def function(self, input_data, weights):
         return self.activation_function(np.dot(input_data, weights))
@@ -105,16 +109,14 @@ class Sequential:
         data_set = np.array([(x_train[index], y_train[index]) for index in range(len(x_train))])
 
         for epoch in range(epochs):
-
             for index, element in enumerate(data_set[::batch_size]):
 
                 deltas = []
 
                 data = data_set[index:index+batch_size]
-
                 input_data = data[:, 0]
                 for layer in self.layers:
-                    layer.propagate_forward(input_data)
+                    layer.propagate_forward(input_data, batch_size)
                     input_data = layer.output
 
                 error = -(data[:, 1] - self.layers[-1].output)
@@ -146,7 +148,7 @@ def main():
     model.add(Dense(units=4, input_dim=2))
     model.add(Activation('relu'))
     model.add(Dense(units=5))
-    model.fit(np.array([[1, 2]]), np.array([1]), batch_size=1)
+    model.fit(np.array([[1, 2], [2, 3]]), np.array([1, 3]), batch_size=1)
 
 
 if __name__ == "__main__":

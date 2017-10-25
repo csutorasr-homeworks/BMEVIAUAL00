@@ -33,7 +33,7 @@ def d_linear(x):
     return 1
 
 
-functions = {'tanh': (tangent_hyperbolic, d_tangent_hyperbolic),
+activations = {'tanh': (tangent_hyperbolic, d_tangent_hyperbolic),
              'sigmoid': (sigmoid, d_sigmoid),
              'relu': (relu, d_relu),
              'linear': (linear, d_linear)}
