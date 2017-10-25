@@ -33,10 +33,10 @@ class Dense:
     def propagate_forward(self, input_data, batch_size):
         # Todo
         data = np.ones((1, (self.input_dim+1)*batch_size))
-        print(input_data)
         for index in range(len(input_data)):
-            data[0, index * batch_size] = input_data[index][0]
-            data[0, index * batch_size + 1] = input_data[index][1]
+            for feature_index in range(len(input_data/batch_size)):
+                print(len(input_data/batch_size))
+                data[0, index * int((len(input_data)/batch_size)) + feature_index] = input_data[index][feature_index]
 
         self.output = self.activation.function(data, self.weights)
 
@@ -108,6 +108,8 @@ class Sequential:
 
         data_set = np.array([(x_train[index], y_train[index]) for index in range(len(x_train))])
 
+        print(data_set)
+
         for epoch in range(epochs):
             for index, element in enumerate(data_set[::batch_size]):
 
@@ -115,6 +117,7 @@ class Sequential:
 
                 data = data_set[index:index+batch_size]
                 input_data = data[:, 0]
+                print(input_data.shape)
                 for layer in self.layers:
                     layer.propagate_forward(input_data, batch_size)
                     input_data = layer.output
@@ -144,11 +147,12 @@ class Sequential:
 
 
 def main():
+    np.random.seed(1)
     model = Sequential()
     model.add(Dense(units=4, input_dim=2))
     model.add(Activation('relu'))
     model.add(Dense(units=5))
-    model.fit(np.array([[1, 2], [2, 3]]), np.array([1, 3]), batch_size=1)
+    model.fit(np.array([np.array([1, 2]), np.array([2, 3])]), np.array([1, 3]), batch_size=2)
 
 
 if __name__ == "__main__":
