@@ -4,7 +4,6 @@ import tkinter.font as tk_font
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showerror
 import xml.etree.ElementTree as ElementTree
-import getpass
 import alg
 import util
 import xmlh
@@ -55,14 +54,14 @@ class Gui(tk.Frame):
     hence the model is not implemented here, but in the alg.py file.
     """
 
-    def __init__(self, gui_root):
-        tk.Frame.__init__(self, gui_root)
-        self.gui_root = gui_root
+    def __init__(self, root):
+        tk.Frame.__init__(self, root)
+        self.root = root
 
-        self.gui_root.title('RightLeft')
+        self.root.title('RightLeft')
 
         self.create_menu()
-        self.canvas = Canvas(self.gui_root, width=window_width, height=window_height)
+        self.canvas = Canvas(self.root, width=window_width, height=window_height)
 
         self.file_name = None
 
@@ -111,24 +110,24 @@ class Gui(tk.Frame):
         """
         Adjusts the window to the center of the screen.
         """
-        self.gui_root.update_idletasks()
-        width = self.gui_root.winfo_width()
-        height = self.gui_root.winfo_height()
-        x = (self.gui_root.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.gui_root.winfo_screenheight() // 2) - (height // 2)
-        self.gui_root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        self.root.update_idletasks()
+        width = self.root.winfo_width()
+        height = self.root.winfo_height()
+        x = (self.root.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.root.winfo_screenheight() // 2) - (height // 2)
+        self.root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
     def create_menu(self):
-        menu = Menu(self.gui_root)
+        menu = Menu(self.root)
 
         file_menu = Menu(menu)
         file_menu.add_command(label="Load File", command=self.load)
         file_menu.add_command(label="Remove Error", command=self.clear)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.gui_root.quit)
+        file_menu.add_command(label="Exit", command=self.root.quit)
         menu.add_cascade(label="File", menu=file_menu)
 
-        self.gui_root.config(menu=menu)
+        self.root.config(menu=menu)
 
     def clear(self):
         if self.file_name is not None:
@@ -146,7 +145,7 @@ class Gui(tk.Frame):
         scale, bias = convert_coordinates(self.strokes)
 
         if self.file_name is not None:
-            self.canvas.create_text(float(self.gui_root.winfo_width()/2),
+            self.canvas.create_text(float(self.root.winfo_width()/2),
                                     float(20), text=self.file_name, fill="black",
                                     font=tk_font.Font(size=10, weight="bold"))
 
