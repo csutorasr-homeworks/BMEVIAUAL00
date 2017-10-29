@@ -2,9 +2,6 @@ import numpy as np
 import func
 
 
-def max_1_dim()
-
-
 class Input:
 
     def __init__(self):
