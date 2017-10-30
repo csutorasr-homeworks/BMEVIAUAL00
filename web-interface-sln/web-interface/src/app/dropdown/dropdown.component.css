@@ -1,8 +1,10 @@
 :host {
     border: solid 1px grey;
+    display: block;
+    margin: 0.6em 0;
 }
 
-div {
+:host > div {
     display: flex;
     align-items: center;
 }
