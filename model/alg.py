@@ -80,20 +80,20 @@ class Algorithm:
             for index in range(len(stroke)):
                 try:
                     if index in range(0, len(stroke) - 1):
-                        stroke_length += util.point_2_point(stroke[index][0], stroke[index + 1][0])
-                        avg_degree += math.fabs(util.calculate_angle(stroke[0][0],
-                                                                     stroke[index + 1][0])) / (len(stroke) - 1)
+                        stroke_length += util.point_2_point(stroke[index], stroke[index + 1])
+                        avg_degree += math.fabs(util.calculate_angle(stroke[0],
+                                                                     stroke[index + 1])) / (len(stroke) - 1)
                     if index in range(1, len(stroke) - 1):
                         # Average distance of the stroke's points from the line,
                         # that connects the first and the final point.
-                        d_line_avg_distance += util.point_2_line(stroke[0][0], stroke[-1][0],
-                                                                 stroke[index][0]) / (len(stroke) - 2)
+                        d_line_avg_distance += util.point_2_line(stroke[0], stroke[-1],
+                                                                 stroke[index]) / (len(stroke) - 2)
                     if index in range(1, len(stroke)):
                         # Average distance of the stroke's points from the horizontal line,
                         # that goes through the first point.
                         h_line_avg_distance += \
-                            util.point_2_line(stroke[0][0], util.Point(stroke[0][0].x + 1, stroke[0][0].y),
-                                              stroke[index][0]) / (len(stroke) - 1)
+                            util.point_2_line(stroke[0], util.Point(stroke[0].x + 1, stroke[0].y),
+                                              stroke[index]) / (len(stroke) - 1)
 
                 except ZeroDivisionError:
                     # In case of division error, that occurs during the calculation of the angle
