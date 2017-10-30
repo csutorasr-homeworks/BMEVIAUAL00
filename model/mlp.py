@@ -169,7 +169,6 @@ class Sequential:
                 for layer_index, layer in enumerate(self.layers[1:]):
                     layer.modify_weights(deltas[layer_index-1], learning_rate=self.learning_rate)
 
-                print("asd")
 
     def compile(self, loss, optimizer):
         pass
