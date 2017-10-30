@@ -14,7 +14,7 @@ def sigmoid(x):
 
 
 def d_sigmoid(x):
-    np.exp(-x)/(1 + np.exp(-x))**2
+    return np.exp(-x)/(1 + np.exp(-x))**2
 
 
 def relu(x):

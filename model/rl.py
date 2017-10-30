@@ -176,7 +176,7 @@ class Gui(tk.Frame):
 
     def load(self):
         file_name = askopenfilename(filetypes=(("XML files", "*.xml"), ("All files", "*.*")),
-                                    initialdir='/home/patrik/Desktop/TestStrokes')
+                                    initialdir='/media/patrik/1EDB65B8599DD93E/Data/Erika/Data')
         if file_name:
             try:
                 self.alg = alg.Algorithm(str(file_name))
