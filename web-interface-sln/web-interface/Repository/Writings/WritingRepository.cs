@@ -67,7 +67,7 @@ namespace WebInterface.Repository.Writings
                 WriterId = writerId,
                 WritingId = writingId,
                 CaptureTime = captureTime,
-                Text = text,
+                Text = System.Net.WebUtility.HtmlDecode(text),
                 Strokes = strokes
             };
             var resultElement = generalElement.Element("Result");
