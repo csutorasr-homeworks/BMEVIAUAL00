@@ -170,13 +170,11 @@ def load_marked_strokes(location):
 
 
 def main():
-    pass
-    #
-    # parse_files('/media/patrik/1EDB65B8599DD93E/Downloads/TestData')
-    # load_marked_strokes('/media/patrik/1EDB65B8599DD93E/PycharmProjects/RightLeft/hstrokes.txt')
-    # save_statistics('/media/patrik/1EDB65B8599DD93E/PycharmProjects/stat',
-    #                np.array(clear_faulty_data(create_stroke_statistics())))
-    #
+
+    parse_files('/home/patrik/Documents/TestData')
+    load_marked_strokes('hstrokes.txt')
+    save_statistics('stat',
+                        np.array(clear_faulty_data(create_stroke_statistics())))
 
 
 if __name__ == "__main__":

@@ -147,14 +147,14 @@ class Gui(tk.Frame):
         if self.file_name is not None:
             self.canvas.create_text(float(self.root.winfo_width()/2),
                                     float(20), text=self.file_name, fill="black",
-                                    font=tk_font.Font(size=10, weight="bold"))
+                                    font=tk_font.Font(size=11, weight="bold"))
 
         for j, stroke in enumerate(self.strokes):
 
             # Draws the index of each stroke onto the canvas.
             self.canvas.create_text(float(stroke.coordinates[0][0][0]) * scale + bias[0],
                                     float(stroke.coordinates[0][0][1]) * scale + bias[1], text=str(j), fill="red",
-                                    font=tk_font.Font(size=8, weight="bold"))
+                                    font=tk_font.Font(size=12, weight="bold"))
             # Connecting the stored stroke coordinates
             for i in range(len(stroke.coordinates)-1):
                 x1 = float(stroke.coordinates[i][0][0]) * scale + bias[0]
