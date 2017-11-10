@@ -2,6 +2,10 @@ import xml.etree.ElementTree as ElementTree
 import util
 import numpy as np
 from collections import OrderedDict
+import sys
+import os
+from os.path import join, isfile
+import re
 
 
 # The constant that multiplies the outlier detector limit
@@ -204,6 +208,8 @@ def predict_stroke_position(stroke_index, lines, strokes):
         for index, x_median in enumerate(x_medians[:-1]):
             distances.append(util.point_2_point(util.Point(x_median, 0), util.Point(x_medians[index + 1], 0)))
 
+        # print(distances)
+
         # If the stroke was determined to be in the line of the previous stroke, then its x position is calculated by
         # adding the average of distances between the strokes' positions in that line, to the final stroke of the line.
         if line_index == lines[stroke_index - 1][0]:
@@ -391,8 +397,28 @@ def build_structure(file_name, time=False):
         return strokes
 
 
+failed = []
+
+
+def clear_files(root_dir):
+    for file in os.listdir(root_dir):
+        if isfile(join(root_dir, file)):
+            try:
+                print(str(join(root_dir, file)) + ":")
+                remove_outliers(join(root_dir, file))
+                print("------------------------------")
+            except:
+                failed.append(str(join(root_dir, file)))
+
+        else:
+            clear_files(join(root_dir, file))
+
+
 def main():
-    pass
+    clear_files(sys.argv[1])
+    print("FAILED:")
+    for file in failed:
+        print(file)
 
 
 if __name__ == "__main__":
