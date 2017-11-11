@@ -64,6 +64,9 @@ def get_stroke_parameters(stroke, file_index, stroke_index):
                 # ignore the point and move to the next.
                 pass
 
+    if stroke_index == 13:
+        print(avg_degree, h_line_avg_distance, d_line_avg_distance, stroke_length, is_horizontal(file_index, stroke_index), file_index)
+
     return avg_degree, h_line_avg_distance, d_line_avg_distance, stroke_length, is_horizontal(file_index, stroke_index)
 
 
@@ -171,10 +174,9 @@ def load_marked_strokes(location):
 
 def main():
 
-    parse_files('/home/patrik/Documents/TestData')
+    parse_files('/media/patrik/1EDB65B8599DD93E/Data/Erika/TestData')
     load_marked_strokes('hstrokes.txt')
-    save_statistics('stat',
-                        np.array(clear_faulty_data(create_stroke_statistics())))
+    save_statistics('stat', np.array(clear_faulty_data(create_stroke_statistics())))
 
 
 if __name__ == "__main__":
