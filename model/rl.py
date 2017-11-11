@@ -168,10 +168,10 @@ class Gui(tk.Frame):
 
         for index, stroke in enumerate(self.strokes):
             if index in h_line_indexes:
-                self.canvas.create_oval(float(stroke.coordinates[0][0][0]) * scale + bias[0] - 0.3,
-                                        float(stroke.coordinates[0][0][1]) * scale + bias[1] - 0.3,
-                                        float(stroke.coordinates[0][0][0]) * scale + bias[0] + 0.3,
-                                        float(stroke.coordinates[0][0][1]) * scale + bias[1] + 0.3,
+                self.canvas.create_oval(float(stroke.coordinates[0][0][0]) * scale + bias[0] - 2,
+                                        float(stroke.coordinates[0][0][1]) * scale + bias[1] - 2,
+                                        float(stroke.coordinates[0][0][0]) * scale + bias[0] + 2,
+                                        float(stroke.coordinates[0][0][1]) * scale + bias[1] + 2,
                                         fill="green")
 
     def load(self):
