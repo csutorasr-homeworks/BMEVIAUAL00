@@ -79,7 +79,7 @@ def calculate_angle(point_a, point_b):
     """
     vector = Point(point_b.x - point_a.x, point_b.y - point_a.y)
     n_vector = Point(vector.x / vector.length, vector.y / vector.length)
-    return math.degrees(math.acos(n_vector.x))
+    return math.degrees(math.acos(math.fabs(n_vector.x)))
 
 
 def get_average(data):
