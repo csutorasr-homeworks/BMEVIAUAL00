@@ -50,7 +50,7 @@ class Algorithm:
             output.append(self.model.predict(np.array(params).reshape(-1, 4)))
 
         for index, stroke in enumerate(self.strokes):
-            if output[index] > 0.2:
+            if output[index] > 0.5:
                 h_lines.append(index)
 
         return h_lines
