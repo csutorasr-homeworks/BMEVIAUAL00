@@ -3,7 +3,17 @@
     <a [routerLink]="'/writer/' + (writerId$ | async)">Choose another writing</a>
     <a [routerLink]="nextLink$ | async" #next>Next Writing (R)</a>
   </nav>
-  <app-dropdown tooltip="Click to show more about the writer.">
+  <ng-template #template>
+    Manual Handedness:
+    <select [value]="manualHandedness" (change)="changeManualHandedness($event.target.value)" (click)="selectClicked($event)">
+      <option value="default" disabled="disabled">Default</option>
+      <option value="left">Left (A)</option>
+      <option value="right">Right (S)</option>
+      <option value="unknown">Unknown (D)</option>
+    </select>
+    Click to show more about the writer.
+  </ng-template>
+  <app-dropdown [template]="template">
     <app-writing-data-changer [text$]="text$" [log$]="log$" [manualHandedness$]="manualHandedness$" (changeManualHandedness)="changeManualHandedness($event)"
       [calculatedHandedness$]="calculatedHandedness$"></app-writing-data-changer>
   </app-dropdown>
