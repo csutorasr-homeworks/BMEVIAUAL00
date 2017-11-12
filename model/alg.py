@@ -19,6 +19,7 @@ class Algorithm:
         self.text_lines = []
         self.strokes = []
         self.h_line_indexes = []
+        self.length = None
 
         self.load_data(file_name)
 
@@ -50,7 +51,7 @@ class Algorithm:
             output.append(self.model.predict(np.array(params).reshape(-1, 4)))
 
         for index, stroke in enumerate(self.strokes):
-            if output[index] > 0.1:
+            if output[index] > 0.15 and self.length[index] > 0.15:
                 h_lines.append(index)
 
         return h_lines
@@ -119,8 +120,7 @@ class Algorithm:
         return np.array([(deg, h_dist, d_dist, length / (length_sum / len(self.strokes))) for
                          (deg, h_dist, d_dist, length) in stroke_set])
 
-    @staticmethod
-    def standardize_input(stat):
+    def standardize_input(self, stat):
         """
         Standardizes the statistics.
         :param stat: An n by 4 matrix, that contains the stroke parameters per column.
@@ -132,6 +132,7 @@ class Algorithm:
         h_distance = stat[:, 1].reshape(-1, 1)
         d_distance = stat[:, 2].reshape(-1, 1)
         length = stat[:, 3].reshape(-1, 1)
+        self.length = length
 
         # If the parameter is None due to faulty xml or outlying stroke length, it is necessary to
         # define them before scaling. To make sure these wont be classified as horizontal lines,
