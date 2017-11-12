@@ -3,6 +3,8 @@ import math
 import util
 import xmlh
 import sys
+import os
+from os.path import isfile, join
 from keras.models import load_model
 from sklearn import preprocessing
 
@@ -16,21 +18,20 @@ class Algorithm:
     def __init__(self, file_name):
         self.model = load_model('right_left.h5')
 
-        self.text_lines = []
         self.strokes = []
         self.h_line_indexes = []
         self.length = None
+        self.file_name = file_name
 
-        self.load_data(file_name)
+        self.load_data()
 
-    def load_data(self, file_name):
+    def load_data(self):
         """
         Loads the data from the xml, and calculates the horizontal lines.
-        :param file_name: String, containing the absolute path of the file.
         :return:
         """
         try:
-            self.strokes = xmlh.build_structure(file_name)
+            self.strokes = xmlh.build_structure(self.file_name)
 
         except IOError as e:
             print('I/O error({0}): {1}.'.format(e.errno, e.strerror))
@@ -163,20 +164,35 @@ class Algorithm:
     def determine_handedness(self):
         line_dir = []
         for index in self.h_line_indexes:
-            if self.strokes[int(index)][0][0].x < self.strokes[int(index)][-1][0].x:
+            if self.strokes[int(index)][0].x < self.strokes[int(index)][-1].x:
                 line_dir.append(False)
             else:
                 line_dir.append(True)
 
         if line_dir.count(True) > 2:
-            return True
+            return "LeftHanded"
 
-        return False
+        elif len(line_dir) <= 2:
+            return "Inconclusive"
+
+        else:
+            return "RightHanded"
+
+
+def dump_predictions(root_dir):
+    for file in os.listdir(root_dir):
+        if isfile(join(root_dir, file)):
+            alg = Algorithm(join(root_dir, file))
+            alg.get_horizontal_lines()
+            xmlh.dump_results(join(root_dir, file), calculated_handedness=alg.determine_handedness())
+            print(join(root_dir, file) + "-Completed")
+
+        else:
+            dump_predictions(join(root_dir, file))
 
 
 def main():
-    alg = Algorithm(str(sys.argv[1]))
-    print(alg.h_line_indexes)
+    dump_predictions(str(sys.argv[1]))
 
 
 if __name__ == "__main__":
