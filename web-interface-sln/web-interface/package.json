@@ -10,7 +10,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "deploy": "concurrently \"npm run build\" \"dotnet build\"",
+    "deploy": "concurrently \"npm install && npm run build\" \"dotnet build\"",
     "start:dotnet": "dotnet run"
   },
   "private": true,
