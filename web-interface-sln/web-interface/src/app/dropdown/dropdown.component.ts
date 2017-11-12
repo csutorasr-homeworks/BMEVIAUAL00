@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-dropdown',
@@ -7,6 +7,7 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class DropdownComponent implements OnInit {
   @Input() tooltip: string;
+  @Input() template: ElementRef;
   show = false;
 
   constructor() { }

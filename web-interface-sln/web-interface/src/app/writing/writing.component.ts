@@ -10,6 +10,7 @@ import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 import { WriterService, Stroke, Orientation } from '../writer.service';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-writing',
@@ -17,6 +18,8 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
   styleUrls: ['./writing.component.css']
 })
 export class WritingComponent implements OnInit, OnDestroy {
+  manualHandednessSubscription: Subscription;
+  manualHandedness: string;
   nextLink$: Observable<string>;
   reloadSubject: BehaviorSubject<{}>;
   calculatedHandedness$: Observable<Orientation>;
@@ -33,6 +36,21 @@ export class WritingComponent implements OnInit, OnDestroy {
   hotheys: Hotkey[] = [
     new Hotkey('r', (event) => {
       this.next.nativeElement.click();
+      event.preventDefault();
+      return false;
+    }),
+    new Hotkey('a', (event) => {
+      this.changeManualHandedness('left');
+      event.preventDefault();
+      return false;
+    }),
+    new Hotkey('s', (event) => {
+      this.changeManualHandedness('right');
+      event.preventDefault();
+      return false;
+    }),
+    new Hotkey('d', (event) => {
+      this.changeManualHandedness('unknown');
       event.preventDefault();
       return false;
     })
@@ -58,6 +76,7 @@ export class WritingComponent implements OnInit, OnDestroy {
     this.text$ = writing$.map(x => x.text);
     this.log$ = writing$.map(x => x.algorithmLog);
     this.manualHandedness$ = writing$.map(x => x.manualHandedness);
+    this.manualHandednessSubscription = this.manualHandedness$.subscribe(x => this.manualHandedness = x ? x : 'default');
     this.calculatedHandedness$ = writing$.map(x => x.calculatedHandedness);
     this.strokes$ = writing$.map(x => x.strokes);
     this.nextLink$ = this.writerService.getNext(this.writerId$, writing$.map(x => x.writingId));
@@ -66,6 +85,7 @@ export class WritingComponent implements OnInit, OnDestroy {
   }
   ngOnDestroy(): void {
     this.hotkeysService.remove(this.hotheys);
+    this.manualHandednessSubscription.unsubscribe();
   }
 
   changeZoom(zoom) {
@@ -112,5 +132,9 @@ export class WritingComponent implements OnInit, OnDestroy {
       this.changeSelected();
       subscription.unsubscribe();
     });
+  }
+
+  selectClicked(event: Event) {
+    event.stopPropagation();
   }
 }
