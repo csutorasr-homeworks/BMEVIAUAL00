@@ -5,7 +5,6 @@ from collections import OrderedDict
 import sys
 import os
 from os.path import join, isfile
-import re
 
 
 # The constant that multiplies the outlier detector limit
@@ -325,10 +324,11 @@ def get_point_distance_limit(data, time=False):
     return (q3 + 1.5 * (q3 - q1)) * limit_multiplier
 
 
-def mark_horizontal(file_name, indexes):
+def mark_horizontal(file_name, indexes, right_strokes):
     """
     Creates an attribute in the given file, for every stroke,
      and gives it value, based on if it is horizontal or not.
+    :param right_strokes:
     :param file_name: Name of the xml.
     :param indexes: Indexes of horizontal strokes in the stroke set, that will be marked as "Yes".
     """
@@ -337,9 +337,11 @@ def mark_horizontal(file_name, indexes):
 
     for index in range(len(root.find('StrokeSet'))):
         if index in indexes:
-            root.find('StrokeSet')[index].attrib['Horizontal'] = "Yes"
-        else:
-            root.find('StrokeSet')[index].attrib['Horizontal'] = "No"
+            root.find('StrokeSet')[index].attrib['isHorizontalStroke'] = "true"
+            if index in right_strokes:
+                root.find('StrokeSet')[index].attrib['strokeDirection'] = "right"
+            else:
+                root.find('StrokeSet')[index].attrib['strokeDirection'] = "left"
 
     tree.write(file_name)
 
@@ -356,17 +358,17 @@ def dump_results(file_name, calculated_handedness=None, algorithm_log=None, manu
     root = tree.getroot()
     general = root.find('General')
 
-    if 'Results' not in [element.tag for element in general]:
-        general.append(ElementTree.Element('Results'))
+    if 'Result' not in [element.tag for element in general]:
+        general.append(ElementTree.Element('Result'))
 
     if calculated_handedness is not None:
-        general.find('Results').attrib['CalculatedHandedness'] = calculated_handedness
+        general.find('Result').attrib['CalculatedHandedness'] = calculated_handedness
 
     if algorithm_log is not None:
-        general.find('Results').attrib['AlgorithmLog'] = algorithm_log
+        general.find('Result').attrib['AlgorithmLog'] = algorithm_log
 
     if manual_handedness is not None:
-        general.find('Results').attrib['ManualHandedness'] = manual_handedness
+        general.find('Result').attrib['ManualHandedness'] = manual_handedness
 
     tree.write(file_name)
 
