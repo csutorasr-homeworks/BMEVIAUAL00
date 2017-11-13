@@ -23,6 +23,8 @@ class Algorithm:
         self.length = None
         self.file_name = file_name
 
+        self.right_strokes = []
+
         self.load_data()
 
     def load_data(self):
@@ -52,7 +54,7 @@ class Algorithm:
             output.append(self.model.predict(np.array(params).reshape(-1, 4)))
 
         for index, stroke in enumerate(self.strokes):
-            if output[index] > 0.15 and self.length[index] > 0.15:
+            if output[index] > 0.2 and self.length[index] > 0.15:
                 h_lines.append(index)
 
         return h_lines
@@ -163,28 +165,30 @@ class Algorithm:
 
     def determine_handedness(self):
         line_dir = []
+
         for index in self.h_line_indexes:
             if self.strokes[int(index)][0].x < self.strokes[int(index)][-1].x:
                 line_dir.append(False)
+                self.right_strokes.append(index)
             else:
                 line_dir.append(True)
 
         if line_dir.count(True) > 2:
-            return "LeftHanded"
+            return "left"
 
         elif len(line_dir) <= 2:
-            return "Inconclusive"
+            return "unknown"
 
         else:
-            return "RightHanded"
+            return "right"
 
 
 def dump_predictions(root_dir):
     for file in os.listdir(root_dir):
         if isfile(join(root_dir, file)):
             alg = Algorithm(join(root_dir, file))
-            alg.get_horizontal_lines()
             xmlh.dump_results(join(root_dir, file), calculated_handedness=alg.determine_handedness())
+            xmlh.mark_horizontal(join(root_dir, file), alg.get_horizontal_lines(), alg.right_strokes)
             print(join(root_dir, file) + "-Completed")
 
         else:
