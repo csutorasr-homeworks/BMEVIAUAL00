@@ -11,16 +11,21 @@ import { Orientation } from '../writer.service';
 })
 export class WritingDataChangerComponent implements OnInit, OnDestroy {
   subscription: Subscription;
+  subscriptionCH: Subscription;
   @Input() text$: Observable<string>;
   @Input() log$: Observable<string>;
   @Input() manualHandedness$: Observable<Orientation>;
   @Input() calculatedHandedness$: Observable<Orientation>;
+  calculatedHandedness: Orientation;
   @Output() changeManualHandedness = new EventEmitter();
   manualHandedness = new FormControl();
 
   constructor() { }
 
   ngOnInit() {
+    this.subscriptionCH = this.calculatedHandedness$.subscribe(x => {
+	this.calculatedHandedness = x;
+    });
     this.subscription = this.manualHandedness$.subscribe(x => {
       if (x) {
         this.manualHandedness.patchValue(x);
@@ -32,6 +37,7 @@ export class WritingDataChangerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    this.subscriptionCH.unsubscribe();
   }
 
   manualHandednessChanged() {
