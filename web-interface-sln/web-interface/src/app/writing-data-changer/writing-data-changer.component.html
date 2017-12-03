@@ -2,9 +2,9 @@
   <tr>
     <th colspan="2">Data of writer:</th>
   </tr>
-  <tr *ngIf="calculatedHandedness$ | async">
+  <tr *ngIf="calculatedHandedness">
     <td>Calculated Handedness:</td>
-    <td>{{calculatedHandedness$ | async}}</td>
+    <td>{{calculatedHandedness}}</td>
   </tr>
   <tr>
     <td>Manual Handedness:</td>

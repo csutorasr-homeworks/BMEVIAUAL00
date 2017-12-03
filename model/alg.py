@@ -3,6 +3,8 @@ import math
 import util
 import xmlh
 import sys
+import os
+from os.path import isfile, join
 from keras.models import load_model
 from sklearn import preprocessing
 
@@ -16,20 +18,22 @@ class Algorithm:
     def __init__(self, file_name):
         self.model = load_model('right_left.h5')
 
-        self.text_lines = []
         self.strokes = []
         self.h_line_indexes = []
+        self.length = None
+        self.file_name = file_name
 
-        self.load_data(file_name)
+        self.right_strokes = []
 
-    def load_data(self, file_name):
+        self.load_data()
+
+    def load_data(self):
         """
         Loads the data from the xml, and calculates the horizontal lines.
-        :param file_name: String, containing the absolute path of the file.
         :return:
         """
         try:
-            self.strokes = xmlh.build_structure(file_name)
+            self.strokes = xmlh.build_structure(self.file_name)
 
         except IOError as e:
             print('I/O error({0}): {1}.'.format(e.errno, e.strerror))
@@ -50,7 +54,7 @@ class Algorithm:
             output.append(self.model.predict(np.array(params).reshape(-1, 4)))
 
         for index, stroke in enumerate(self.strokes):
-            if output[index] > 0.2:
+            if output[index] > 0.2 and self.length[index] > 0.15:
                 h_lines.append(index)
 
         return h_lines
@@ -119,8 +123,7 @@ class Algorithm:
         return np.array([(deg, h_dist, d_dist, length / (length_sum / len(self.strokes))) for
                          (deg, h_dist, d_dist, length) in stroke_set])
 
-    @staticmethod
-    def standardize_input(stat):
+    def standardize_input(self, stat):
         """
         Standardizes the statistics.
         :param stat: An n by 4 matrix, that contains the stroke parameters per column.
@@ -132,6 +135,7 @@ class Algorithm:
         h_distance = stat[:, 1].reshape(-1, 1)
         d_distance = stat[:, 2].reshape(-1, 1)
         length = stat[:, 3].reshape(-1, 1)
+        self.length = length
 
         # If the parameter is None due to faulty xml or outlying stroke length, it is necessary to
         # define them before scaling. To make sure these wont be classified as horizontal lines,
@@ -161,21 +165,38 @@ class Algorithm:
 
     def determine_handedness(self):
         line_dir = []
+
         for index in self.h_line_indexes:
-            if self.strokes[int(index)][0][0].x < self.strokes[int(index)][-1][0].x:
+            if self.strokes[int(index)][0].x < self.strokes[int(index)][-1].x:
                 line_dir.append(False)
+                self.right_strokes.append(index)
             else:
                 line_dir.append(True)
 
         if line_dir.count(True) > 2:
-            return True
+            return "left"
 
-        return False
+        elif len(line_dir) <= 2:
+            return "unknown"
+
+        else:
+            return "right"
+
+
+def dump_predictions(root_dir):
+    for file in os.listdir(root_dir):
+        if isfile(join(root_dir, file)):
+            alg = Algorithm(join(root_dir, file))
+            xmlh.dump_results(join(root_dir, file), calculated_handedness=alg.determine_handedness())
+            xmlh.mark_horizontal(join(root_dir, file), alg.get_horizontal_lines(), alg.right_strokes)
+            print(join(root_dir, file) + "-Completed")
+
+        else:
+            dump_predictions(join(root_dir, file))
 
 
 def main():
-    alg = Algorithm(str(sys.argv[1]))
-    print(alg.h_line_indexes)
+    dump_predictions(str(sys.argv[1]))
 
 
 if __name__ == "__main__":
