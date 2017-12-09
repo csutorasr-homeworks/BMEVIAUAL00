@@ -118,16 +118,7 @@ plt.ylabel('Length', fontsize=10)
 ...
 ```
 
-
-
-
-    <matplotlib.text.Text at 0x7f4379616c88>
-
-
-
-
 ![png](output_7_1.png)
-
 
 
 ```python
@@ -141,16 +132,7 @@ plt.ylabel('Length', fontsize=10)
 ...
 ```
 
-
-
-
-    <matplotlib.text.Text at 0x7f4373af3438>
-
-
-
-
 ![png](output_8_1.png)
-
 
 
 ```python
@@ -164,16 +146,7 @@ plt.ylabel('D_Distance', fontsize=10)
 ...
 ```
 
-
-
-
-    <matplotlib.text.Text at 0x7f7744eb60f0>
-
-
-
-
 ![png](output_9_1.png)
-
 
 
 ```python
@@ -189,16 +162,7 @@ plt.xlabel('H_Distance', fontsize=10)
 plt.ylabel('Degree', fontsize=10)
 ```
 
-
-
-
-    <matplotlib.text.Text at 0x7f7744d14f28>
-
-
-
-
 ![png](output_10_1.png)
-
 
 
 ```python
@@ -211,14 +175,6 @@ ax.set_xlabel('H_Distance', fontsize=16)
 ax.set_ylabel('Degree', fontsize=16)
 ax.set_zlabel('D_distance', fontsize=16)
 ```
-
-
-
-
-    <matplotlib.text.Text at 0x7fe44d92ad68>
-
-
-
 
 ![png](output_11_1.png)
 
@@ -472,12 +428,6 @@ ax.set_zlabel('D_distance', fontsize=16)
 ```
 
 
-
-
-    <matplotlib.text.Text at 0x7f76e12d9ac8>
-
-
-
 ![png](output_29_1.png)
 
 A mély neurális osztályozó hibáját nem sikerült ennél jobban visszaszorítani, így utólag, kézi szűréssel oldottuk meg, hogy a tipikusan rövid húzásokat, ne minősítse jó megoldásnak.
@@ -513,6 +463,10 @@ A végső algoritmus vázlatos működése a következő:
 
 ##### 5. A részhalmazok közül a a helyes pozícióhoz legközelebb fekvő részhalmaz kiválasztása.
 ###### Az algoritmus utolsó lépése, ekkor elhagyjuk az összes olyan pontot, ami nem volt része a legközelebbi részhalmaznak, és a megmaradó pontok fogják alkotni a már hibátlan pontokkal rendelkező húzást.
+
+## Osztályozás
+
+Az író jobb vagy bal kezes voltának megállíptását az alapján végezzük, ha az írás kettőnél több jobbról balra húzott stroke-ot tartalmaz akkor balkezes, ha 1 vagy 2 ilyen húzás található, akkor nem megállíptható, ha pedig csak balról jobbra van, akkor jobbkezes.
 
 # Felhasználói felület
 
